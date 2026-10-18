@@ -1,0 +1,12 @@
+PS5
+This work is based on "PS5" (https://sketchfab.com/3d-models/ps5-d788de3735964151a3e24fd59c0f1956) by rtql8d (https://sketchfab.com/rtql8d), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+Retained source: assets/ps5.glb; unmodified user-supplied GLB.
+Runtime file: public/models/ps5-optimized.glb.
+
+Playstation 5 Dualsense
+This work is based on "Playstation 5 Dualsense" (https://sketchfab.com/3d-models/playstation-5-dualsense-878c1f882808477ab81c2fe86d5a3936) by AHarmlessPotato (https://sketchfab.com/AHarmlessPotato), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+Retained source: assets/playstation_5_dualsense (1).glb; unmodified user-supplied 1K-texture version.
+Runtime file: public/models/dualsense-optimized.glb.
+
+Optimized derivatives: ps5-optimized.glb and dualsense-optimized.glb.
+Changes: duplicate vertices/resources removed, unused data pruned, vertex attributes quantized, and geometry compressed with EXT_meshopt_compression using glTF Transform. Embedded texture images and triangle counts preserved. Original attribution and CC BY 4.0 terms apply.
