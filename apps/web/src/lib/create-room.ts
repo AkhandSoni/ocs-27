@@ -1,9 +1,11 @@
 import * as THREE from "three";
-import { WebGPURenderer } from "three/webgpu";
+import { MeshBasicNodeMaterial, WebGPURenderer } from "three/webgpu";
+import { vec4 } from "three/tsl";
 import { CSS3DObject, CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { buildRoom } from "./room-objects";
+import { createControllerPickup } from "./controller-pickup";
 
 export type RoomController = {
   setAccent: (color: string) => void;
@@ -40,7 +42,7 @@ export async function createRoom(
   const lookTarget = new THREE.Vector3(0, 3.65, -0.3);
 
   const forceWebGL = new URLSearchParams(window.location.search).get("renderer") === "webgl";
-  const renderer = new WebGPURenderer({ antialias: true, alpha: false, forceWebGL });
+  const renderer = new WebGPURenderer({ antialias: true, alpha: true, forceWebGL });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -49,6 +51,7 @@ export async function createRoom(
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute("aria-label", "Interactive 3D gaming lounge with a PlayStation 5 and walnut furniture");
   renderer.domElement.setAttribute("role", "img");
+  Object.assign(renderer.domElement.style, { position: "absolute", inset: "0", zIndex: "1", pointerEvents: "none" });
   container.appendChild(renderer.domElement);
 
   try {
@@ -61,7 +64,7 @@ export async function createRoom(
 
   const cssRenderer = new CSS3DRenderer();
   cssRenderer.domElement.className = "tv-dom-layer";
-  Object.assign(cssRenderer.domElement.style, { position: "absolute", inset: "0", pointerEvents: "none" });
+  Object.assign(cssRenderer.domElement.style, { position: "absolute", inset: "0", zIndex: "0", pointerEvents: "none" });
   container.appendChild(cssRenderer.domElement);
   const cssScene = new THREE.Scene();
   Object.assign(screenElement.style, { width: "1280px", height: "720px", pointerEvents: "auto", backfaceVisibility: "hidden", overflow: "hidden", background: "#080a0a" });
@@ -105,7 +108,12 @@ export async function createRoom(
   const rim = new THREE.Mesh(new THREE.BoxGeometry(5.73, 3.27, 0.045), new THREE.MeshStandardMaterial({ color: "#111313", metalness: 0.75, roughness: 0.22 }));
   rim.position.set(0, 3.65, -0.377);
   tvGroup.add(rim);
-  const glass = new THREE.Mesh(new THREE.PlaneGeometry(5.64, 3.1725), new THREE.MeshBasicMaterial({ color: "#070a0b" }));
+  // A depth-tested transparent aperture reveals the DOM display below the GPU
+  // canvas. Foreground geometry can now cover the screen without a second renderer.
+  const aperture = new MeshBasicNodeMaterial({ transparent: true, blending: THREE.NoBlending, fog: false, toneMapped: false });
+  // Write zero alpha explicitly: ordinary transparent materials discard alpha=0.
+  aperture.fragmentNode = vec4(0, 0, 0, 0);
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(5.64, 3.1725), aperture);
   glass.position.set(0, 3.65, -0.351);
   tvGroup.add(glass);
   const led = new THREE.Mesh(new THREE.SphereGeometry(0.009, 8, 8), new THREE.MeshBasicMaterial({ color: "#d5e7dd" }));
@@ -116,6 +124,7 @@ export async function createRoom(
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const models: THREE.Object3D[] = [];
   const mixers: THREE.AnimationMixer[] = [];
+  let pickup: ReturnType<typeof createControllerPickup> | undefined;
 
   async function addModel(path: string, height: number, position: THREE.Vector3, rotation: THREE.Euler) {
     try {
@@ -161,6 +170,7 @@ export async function createRoom(
         gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
         mixers.push(mixer);
       }
+      return placement;
     } catch (error) {
       if (!disposed) callbacks.onAssetError(`A device model could not load: ${error instanceof Error ? error.message : path}`);
     }
@@ -168,7 +178,9 @@ export async function createRoom(
 
   void Promise.all([
     addModel("/models/ps5-optimized.glb", 1.4, new THREE.Vector3(-3.65, 1.46, -0.05), new THREE.Euler(0, 0.08, 0)),
-    addModel("/models/dualsense-optimized.glb", 0.51, new THREE.Vector3(-2.47, 1.45, 0.28), new THREE.Euler(-0.25, Math.PI - 0.08, 0.02)),
+    addModel("/models/dualsense-optimized.glb", 0.51, new THREE.Vector3(-2.47, 1.45, 0.28), new THREE.Euler(-0.25, Math.PI - 0.08, 0.02)).then(model => {
+      if (model && !disposed) pickup = createControllerPickup(model, camera, container, () => reducedMotion.matches);
+    }),
   ]);
 
   let width = 0;
@@ -224,6 +236,7 @@ export async function createRoom(
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, ease);
     lookTarget.y = THREE.MathUtils.lerp(lookTarget.y, focused ? 3.65 : roomTargetY, ease);
     camera.lookAt(lookTarget);
+    pickup?.update(delta, time, pointerX, pointerY);
     room.accentLights.forEach((light, i) => {
       // Preserve the blue/pink split from the room reference; selection adds a subtle tint.
       const referenceColor = light.userData.referenceTint as THREE.Color | undefined ?? new THREE.Color(light.userData.baseColor as THREE.ColorRepresentation);
@@ -267,6 +280,7 @@ export async function createRoom(
       intersectionObserver.disconnect();
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("visibilitychange", onVisibility);
+      pickup?.dispose();
       mixers.forEach((mixer) => mixer.stopAllAction());
       disposeObject(scene);
       renderer.dispose();

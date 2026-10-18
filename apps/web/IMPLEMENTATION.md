@@ -14,6 +14,7 @@ A first signed-out visit runs a 17.4-second code-rendered startup after the room
 | `src/components/ConsoleExperience.tsx` | Canvas/CSS startup, profile picker, authentication forms, session restore |
 | `src/components/GameScreen.tsx` | Games/Media home, search, library, details, launch screen, account menus |
 | `src/lib/create-room.ts` | WebGPU/WebGL renderer, shared camera, CSS3D TV, model loading, cleanup |
+| `src/lib/controller-pickup.ts` | Raycast picking, reversible pickup animation, camera-relative grip, keyboard access |
 | `src/lib/room-objects.ts` | Procedural room, walnut furniture, plants, lights, photographic gallery |
 | `src/lib/auth.ts` | SQLite users/sessions, validation, password hashing, origin and cookie handling |
 | `src/app/api/auth/*/route.ts` | Local account HTTP endpoints |
@@ -38,6 +39,8 @@ Names are 2–24 characters, email addresses are normalized, passwords are 8–1
 ## Graphics and media
 
 WebGPURenderer selects WebGPU or falls back to WebGL 2. `?renderer=webgl` forces the fallback; inspect `.room-stage[data-renderer]` to identify the active backend. The default camera stays focused on the TV and adapts to viewport aspect ratio. The HTML interface is a CSS3DObject using that same camera, so its controls remain native DOM controls.
+
+The GPU canvas sits above the DOM layer. The TV's depth-tested aperture writes zero RGBA with a TSL fragment node and disabled blending, revealing the HTML display while allowing the held controller to cover it. One renderer and the same supplied controller model serve both cabinet and first-person poses. Picking uses a bounding-box broad phase followed by mesh raycasting; actual controller pixels intercept clicks before underlying TV controls. Pickup and return interpolate position, quaternion, and scale from the current pose, including interrupted/reversed movement. The camera-relative grip follows camera/viewport changes, and reduced motion disables travel and sway. Event listeners, the accessible hit target, and state attributes are removed when the room is disposed.
 
 Both optimized device models require `EXT_meshopt_compression` and `KHR_mesh_quantization`. Meshopt WASM decodes their geometry. The optimization script reads the retained canonical inputs `assets/ps5.glb` and `assets/playstation_5_dualsense (1).glb`, then writes only optimized runtime models into `public/models/`. It welds, deduplicates, prunes, and compresses geometry, then decodes the results and checks triangle counts, embedded image hashes, and unchanged input files. Duplicate raw models, source archives, unused font files, and the obsolete screenshot are removed; credits remain alongside the runtime assets.
 

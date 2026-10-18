@@ -6,7 +6,7 @@
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
-    "test": "node --experimental-strip-types --test tests/auth.test.mjs tests/auth-routes.test.mjs",
+    "test": "node --experimental-strip-types --test tests/auth.test.mjs tests/auth-routes.test.mjs tests/controller-pickup.test.mjs",
     "typecheck": "tsc --noEmit",
     "optimize:models": "node scripts/optimize-models.mjs"
   },
