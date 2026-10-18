@@ -1,5 +1,8 @@
 "use client";
 
+// @refresh reset
+// Restart the console flow when its hooks change during development.
+
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { ArrowLeft, Bot, Check, ChevronRight, CircleAlert, Eye, EyeOff, Gamepad2, LoaderCircle, Mountain, Orbit, Plus, Power, RotateCcw, Sparkles, Sun, X } from "lucide-react";
 import styles from "./ConsoleExperience.module.css";
@@ -215,13 +218,11 @@ export default function ConsoleExperience({ children, ready = true, onHome, onUs
   }, [stage, ready]);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      if (stage === "users") (screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-known]") ?? screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-card]"))?.focus({ preventScroll: true });
-      if (stage === "signin") (selectedProfile ? passwordRef.current : emailRef.current)?.focus({ preventScroll: true });
-      if (stage === "register") nameRef.current?.focus({ preventScroll: true });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [stage, selectedProfile]);
+    if (!ready) return;
+    if (stage === "users") (screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-known]") ?? screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-card]"))?.focus({ preventScroll: true });
+    if (stage === "signin") (selectedProfile ? passwordRef.current : emailRef.current)?.focus({ preventScroll: true });
+    if (stage === "register") nameRef.current?.focus({ preventScroll: true });
+  }, [stage, selectedProfile, ready]);
 
   useEffect(() => {
     const openUsers = () => { setStage((current) => current === "home" ? "users" : current); setError(""); setSystemError(""); };
@@ -282,7 +283,7 @@ export default function ConsoleExperience({ children, ready = true, onHome, onUs
     }
   }
 
-  if (stage === "home") return <div className={styles.home} data-console-stage="home">{children}{systemError && <div className={styles.homeError} role="alert"><CircleAlert size={16} />{systemError}<button aria-label="Dismiss message" onClick={() => setSystemError("")}><X size={16} /></button></div>}</div>;
+  if (stage === "home") return <div className={styles.home} data-console-stage="home">{ready && children}{systemError && <div className={styles.homeError} role="alert"><CircleAlert size={16} />{systemError}<button aria-label="Dismiss message" onClick={() => setSystemError("")}><X size={16} /></button></div>}</div>;
 
   const isForm = stage === "signin" || stage === "register";
   const registering = stage === "register";
