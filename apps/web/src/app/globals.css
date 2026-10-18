@@ -70,6 +70,72 @@ a:focus-visible {
   font-family: Arial, Helvetica, sans-serif;
   outline: none;
 }
+.tv-static {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  place-items: center;
+  background: #080808;
+  color: #f2f0e9;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.tv-static canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  opacity: 0.72;
+}
+.tv-static::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    #0005 4px 5px
+  );
+}
+.tv-static-overlay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  text-align: center;
+  text-shadow: 0 1px 8px #000;
+}
+.tv-static-overlay p,
+.tv-static-overlay span {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: #dfdfdc;
+}
+.tv-static-overlay h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 64px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+.tv-static-overlay button {
+  margin: 10px 0 2px;
+  padding: 12px 22px;
+  border: 1px solid #ffffffa0;
+  background: #111d;
+  color: white;
+  font-size: 15px;
+}
+.tv-static-overlay button:hover,
+.tv-static-overlay button:focus-visible {
+  background: #292929;
+}
 .room-loading {
   position: absolute;
   inset: 0;
@@ -171,7 +237,7 @@ a:focus-visible {
   margin-left: 7px;
 }
 .controller-card {
-  width: 280px;
+  width: 330px;
   padding: 16px;
   margin-bottom: 10px;
   border: 1px solid #ffffff30;
@@ -194,10 +260,10 @@ a:focus-visible {
 }
 .virtual-controller {
   position: relative;
-  width: 245px;
-  height: 120px;
+  width: 298px;
+  height: 160px;
   margin-top: 15px;
-  border-radius: 45px;
+  border-radius: 56px 56px 48px 48px;
   background: #cbd3da;
   box-shadow:
     inset 0 2px 3px white,
@@ -206,10 +272,10 @@ a:focus-visible {
 .virtual-controller::before {
   content: "";
   position: absolute;
-  left: 92px;
-  top: 12px;
-  width: 65px;
-  height: 44px;
+  left: 120px;
+  top: 45px;
+  width: 58px;
+  height: 33px;
   border-radius: 7px 7px 20px 20px;
   background: #19232e;
 }
@@ -229,37 +295,165 @@ a:focus-visible {
   touch-action: none;
 }
 .pad-up {
-  left: 43px;
-  top: 18px;
+  left: 48px;
+  top: 55px;
 }
 .pad-left {
-  left: 17px;
-  top: 44px;
+  left: 22px;
+  top: 81px;
 }
 .pad-right {
-  left: 69px;
-  top: 44px;
+  left: 74px;
+  top: 81px;
 }
 .pad-down {
-  left: 43px;
-  top: 70px;
+  left: 48px;
+  top: 107px;
 }
-.pad-confirm {
-  left: 181px;
-  top: 69px;
+.pad-l2,
+.pad-r2 {
+  width: 55px !important;
+  height: 22px !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  top: 0;
 }
-.pad-back {
-  left: 207px;
+.pad-l2 {
+  left: 18px;
+}
+.pad-r2 {
+  right: 18px;
+}
+.pad-l1,
+.pad-r1,
+.pad-create,
+.pad-options {
+  width: 44px !important;
+  height: 22px !important;
+  border-radius: 6px !important;
+  font-size: 9px !important;
+  top: 28px;
+}
+.pad-l1 {
+  left: 78px;
+}
+.pad-r1 {
+  right: 78px;
+}
+.pad-create {
+  left: 92px;
   top: 43px;
 }
-.pad-home {
-  left: 111px;
-  top: 76px;
+.pad-options {
+  right: 92px;
+  top: 43px;
+}
+.pad-touchpad {
+  width: 54px !important;
+  height: 28px !important;
+  left: 122px;
+  top: 69px;
+  font-size: 11px !important;
+  border-radius: 5px !important;
+}
+.pad-l3,
+.pad-r3 {
+  top: 105px;
+  font-size: 10px !important;
+}
+.pad-l3 {
+  left: 126px;
+  top: 116px;
+}
+.pad-r3 {
+  right: 94px;
+  top: 116px;
+}
+.pad-l3,
+.pad-r3 {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 8px !important;
+}
+.pad-lst-up,
+.pad-lst-down,
+.pad-lst-left,
+.pad-lst-right,
+.pad-rst-up,
+.pad-rst-down,
+.pad-rst-left,
+.pad-rst-right {
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 9px !important;
+}
+.pad-lst-up {
+  left: 128px;
+  top: 98px;
+}
+.pad-lst-down {
+  left: 128px;
+  top: 140px;
+}
+.pad-lst-left {
+  left: 105px;
+  top: 118px;
+}
+.pad-lst-right {
+  left: 151px;
+  top: 118px;
+}
+.pad-rst-up {
+  left: 190px;
+  top: 98px;
+}
+.pad-rst-down {
+  left: 190px;
+  top: 140px;
+}
+.pad-rst-left {
+  left: 167px;
+  top: 118px;
+}
+.pad-rst-right {
+  left: 213px;
+  top: 118px;
+}
+.pad-square,
+.pad-triangle,
+.pad-circle,
+.pad-cross {
+  width: 25px !important;
+  height: 25px !important;
+}
+.pad-triangle {
+  right: 36px;
+  top: 49px;
+}
+.pad-square {
+  right: 62px;
+  top: 75px;
+}
+.pad-circle {
+  right: 10px;
+  top: 75px;
+}
+.pad-cross {
+  right: 36px;
+  top: 101px;
+}
+.pad-l2,
+.pad-l1,
+.pad-r1,
+.pad-r2,
+.pad-create,
+.pad-options {
+  border-radius: 6px;
 }
 .physical-controller {
   position: relative;
-  width: 250px;
-  height: 120px;
+  width: 298px;
+  height: 160px;
   pointer-events: none;
 }
 .physical-controller button {
@@ -272,33 +466,173 @@ a:focus-visible {
 .physical-controller:focus-within button {
   opacity: 1;
 }
-.physical-up {
-  left: 70px;
+.physical-up,
+.physical-left,
+.physical-right,
+.physical-down,
+.physical-l2,
+.physical-r2,
+.physical-l1,
+.physical-r1,
+.physical-create,
+.physical-options,
+.physical-touchpad,
+.physical-l3,
+.physical-r3,
+.physical-square,
+.physical-triangle,
+.physical-circle,
+.physical-cross {
+  left: auto;
+  top: auto;
+}
+.physical-l2,
+.physical-r2 {
+  width: 55px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 10px;
   top: 0;
 }
+.physical-l2 {
+  left: 18px;
+}
+.physical-r2 {
+  right: 18px;
+}
+.physical-l1,
+.physical-r1,
+.physical-create,
+.physical-options {
+  width: 44px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 9px;
+  top: 28px;
+}
+.physical-l1 {
+  left: 78px;
+}
+.physical-r1 {
+  right: 78px;
+}
+.physical-create {
+  left: 92px;
+  top: 43px;
+}
+.physical-options {
+  right: 92px;
+  top: 43px;
+}
+.physical-touchpad {
+  width: 54px !important;
+  height: 28px !important;
+  left: 122px !important;
+  top: 69px !important;
+  border-radius: 5px !important;
+  font-size: 11px !important;
+}
+.physical-up {
+  left: 48px;
+  top: 55px;
+}
 .physical-left {
-  left: 44px;
-  top: 26px;
+  left: 22px;
+  top: 81px;
 }
 .physical-right {
-  left: 96px;
-  top: 26px;
+  left: 74px;
+  top: 81px;
 }
 .physical-down {
-  left: 70px;
-  top: 52px;
+  left: 48px;
+  top: 107px;
 }
-.physical-confirm {
+.physical-l3,
+.physical-r3 {
+  top: 105px;
+  font-size: 10px;
+}
+.physical-l3 {
+  left: 126px;
+  top: 116px;
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+.physical-r3 {
+  right: 94px;
+  top: 116px;
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+.physical-lst-up,
+.physical-lst-down,
+.physical-lst-left,
+.physical-lst-right,
+.physical-rst-up,
+.physical-rst-down,
+.physical-rst-left,
+.physical-rst-right {
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+}
+.physical-lst-up {
+  left: 128px;
+  top: 98px;
+}
+.physical-lst-down {
+  left: 128px;
+  top: 140px;
+}
+.physical-lst-left {
+  left: 105px;
+  top: 118px;
+}
+.physical-lst-right {
+  left: 151px;
+  top: 118px;
+}
+.physical-rst-up {
   left: 190px;
-  top: 45px;
+  top: 98px;
 }
-.physical-back {
-  left: 216px;
-  top: 19px;
+.physical-rst-down {
+  left: 190px;
+  top: 140px;
 }
-.physical-home {
-  left: 125px;
-  top: 68px;
+.physical-rst-left {
+  left: 167px;
+  top: 118px;
+}
+.physical-rst-right {
+  left: 213px;
+  top: 118px;
+}
+.physical-square,
+.physical-triangle,
+.physical-circle,
+.physical-cross {
+  width: 25px;
+  height: 25px;
+}
+.physical-triangle {
+  right: 36px;
+  top: 49px;
+}
+.physical-square {
+  right: 62px;
+  top: 75px;
+}
+.physical-circle {
+  right: 10px;
+  top: 75px;
+}
+.physical-cross {
+  right: 36px;
+  top: 101px;
 }
 .virtual-controller button[data-pressed="true"],
 .physical-controller button[data-pressed="true"] {

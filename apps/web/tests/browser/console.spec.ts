@@ -17,13 +17,21 @@ test.afterEach(async ({ page }) => {
   expect(errors.get(page)).toEqual([]);
 });
 async function enter(page: Page, renderer = "webgl") {
-  await page.addInitScript(() => sessionStorage.setItem("ocs:boot:v2", "1"));
   await page.goto(renderer ? `/?renderer=${renderer}` : "/");
+  await continueStartup(page);
   await expect(page.locator("[data-console-home]")).toBeVisible();
   await expect(page.locator(".room-stage")).toHaveAttribute(
     "data-renderer",
     /WebGPU|WebGL 2/,
   );
+}
+async function continueStartup(page: Page) {
+  const skip = page.getByRole("button", { name: /Skip startup/ });
+  if (await skip.isVisible().catch(() => false))
+    await skip.click({ force: true });
+  await page
+    .getByRole("button", { name: /Continue as guest|Continue to console/ })
+    .click();
 }
 async function choose(page: Page, name: string) {
   await page
@@ -74,6 +82,11 @@ test("short skippable startup opens an original guest console and five domains",
     .getByRole("button", { name: /Skip startup/ })
     .click({ force: true, timeout: 800 })
     .catch(() => {});
+  await expect(page.locator(".startup-screen")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("login.png") });
+  await page
+    .getByRole("button", { name: "Continue as guest", exact: true })
+    .click();
   await expect(page.locator("[data-console-home]")).toBeVisible();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".room-stage")).toHaveAttribute(
@@ -82,20 +95,33 @@ test("short skippable startup opens an original guest console and five domains",
   );
   await expect(page.locator(".cartridge")).toHaveCount(8);
   await expect(page.locator(".console-home img")).toHaveCount(0);
-  await expect(page.locator(".experience-preview")).toContainText("Web & App");
+  await expect(page.locator(".game-capabilities")).toContainText("Web & App");
   await expect(page.locator(".console-home canvas")).toHaveCount(0);
   await page.screenshot({ path: info.outputPath("home.png") });
-  for (const name of [
-    "TECH",
-    "RESEARCH",
-    "MANAGEMENT",
-    "DESIGN",
-    "COMPETITIVE CODING",
+  for (const [id, name] of [
+    ["tech", "TECH"],
+    ["research", "RESEARCH"],
+    ["management", "MANAGEMENT"],
+    ["design", "DESIGN"],
+    ["cc", "COMPETITIVE CODING"],
   ]) {
-    await choose(page, name);
+    const cartridge = page.getByRole("button", {
+      name: `Select ${name}`,
+      exact: true,
+    });
+    await cartridge.focus();
+    await expect(
+      page.getByRole("heading", { name, exact: true }),
+    ).toBeVisible();
+    await page.screenshot({ path: info.outputPath(`world-${id}.png`) });
+    await cartridge
+      .locator(".game-cover")
+      .screenshot({ path: info.outputPath(`cover-${id}.png`) });
+    await page.keyboard.press("Enter");
     await expect(
       page.getByRole("button", { name: "Begin application", exact: true }),
     ).toBeVisible();
+    await page.screenshot({ path: info.outputPath(`hub-${id}.png`) });
     await page.getByRole("button", { name: "Your role", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "What you’ll do", exact: true }),
@@ -113,6 +139,37 @@ test("short skippable startup opens an original guest console and five domains",
     .getByRole("button", { name: "Begin application", exact: true })
     .click();
   await page.screenshot({ path: info.outputPath("application.png") });
+});
+
+test("physical console powers off to TV static and the complete controller works", async ({
+  page,
+}) => {
+  await enter(page);
+  await page.getByRole("button", { name: "Room view" }).click();
+  await page.waitForTimeout(500);
+  await page.mouse.click(290, 540);
+  await expect(page.getByRole("heading", { name: "System off" })).toBeVisible();
+  await expect(page.locator(".tv-static canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Power on" }).click();
+  await continueStartup(page);
+  await expect(page.locator("[data-console-home]")).toBeVisible();
+
+  await page.getByRole("button", { name: "Controller", exact: true }).click();
+  await expect(page.locator(".virtual-controller button")).toHaveCount(25);
+  await page
+    .getByRole("button", { name: "L2 trigger · Previous", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Options · Control center", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Control center" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /Turn off console/ }).click();
+  await expect(page.getByRole("heading", { name: "System off" })).toBeVisible();
+  await page.getByRole("button", { name: "Power on" }).click();
+  await continueStartup(page);
+  await expect(page.locator("[data-console-home]")).toBeVisible();
 });
 
 test("guest application persists, signs in at submission, and saves an honest local receipt", async ({
@@ -179,6 +236,7 @@ test("guest application persists, signs in at submission, and saves an honest lo
     }),
   ).toBeVisible();
   await page.reload();
+  await continueStartup(page);
   await expect(page.locator("[data-console-home]")).toBeVisible();
   await choose(page, "MY CONSOLE");
   await page
@@ -217,7 +275,7 @@ test("keyboard, physical controller, contextual back and draft persistence work"
   await expect(page.locator("[data-console-home]")).toBeVisible();
   await page.getByRole("button", { name: "Room view", exact: true }).click();
   await page
-    .getByRole("button", { name: "Room controller move right", exact: true })
+    .getByRole("button", { name: "Room controller D-pad right", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Select MANAGEMENT", exact: true }),
@@ -241,6 +299,7 @@ test("keyboard, physical controller, contextual back and draft persistence work"
   ).toHaveValue("26BCE0001");
   await page.keyboard.press("Home");
   await page.reload();
+  await continueStartup(page);
   await choose(page, "MANAGEMENT");
   await page
     .getByRole("button", { name: "Begin application", exact: true })
@@ -275,6 +334,7 @@ test("arcade is playable, pauses, scores, ends, and retains a high score", async
   ).toBeVisible();
   await page.screenshot({ path: info.outputPath("arcade-played.png") });
   await page.reload();
+  await continueStartup(page);
   await page.getByRole("button", { name: "Arcade", exact: true }).click();
   await expect(page.locator(".arcade-score")).toContainText("010");
   await page.getByRole("button", { name: "Start run", exact: true }).click();
@@ -323,6 +383,7 @@ test("chapter collection, profile isolation, logout and reset use the same conso
   await identity(page);
   await register(page, "Second Player");
   await page.reload();
+  await continueStartup(page);
   await choose(page, "MY CONSOLE");
   await expect(
     page.getByText("No application started", { exact: true }),
@@ -386,7 +447,9 @@ test("WebGPU renders the retained room; mobile console stays usable", async ({
     390,
   );
   await page.getByRole("button", { name: "Controller", exact: true }).click();
-  await page.getByRole("button", { name: "Back", exact: true }).last().click();
+  await page
+    .getByRole("button", { name: "Circle · Back", exact: true })
+    .click();
   await expect(
     page.getByRole("heading", { name: "First, your introduction." }),
   ).toBeVisible();

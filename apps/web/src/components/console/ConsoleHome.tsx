@@ -4,6 +4,10 @@ import { ArrowRight, Check } from "lucide-react";
 import { experienceOrder, experiences, type ExperienceId } from "./content";
 import Glyph from "./Glyph";
 import ExperiencePreview from "./ExperiencePreview";
+import DomainArtwork from "./art/DomainArtwork";
+import GameCover from "./art/GameCover";
+import { gameIdentities, isDomain } from "./game-identities";
+import { domainById } from "./content";
 export default function ConsoleHome({
   selected,
   onSelect,
@@ -28,6 +32,15 @@ export default function ConsoleHome({
   }, [selected]);
   return (
     <div className="console-home" data-console-home>
+      {isDomain(selected) && (
+        <div
+          className={`home-world world-${selected}`}
+          key={`world-${selected}`}
+        >
+          <DomainArtwork id={selected} />
+          <div className="world-legibility" />
+        </div>
+      )}
       <div
         className="experience-rail"
         ref={rail}
@@ -50,7 +63,7 @@ export default function ConsoleHome({
             <span className="cartridge-index">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <Glyph id={id} />
+            {isDomain(id) ? <GameCover id={id} /> : <Glyph id={id} />}
             <span className="cartridge-name">
               {id === "cc"
                 ? "CC"
@@ -79,21 +92,22 @@ export default function ConsoleHome({
         key={selected}
       >
         <p className="system-kicker">
-          ACM-VIT ORGANIZING COMMITTEE SELECTIONS ’27
+          {isDomain(selected)
+            ? `${domainById[selected].name.toUpperCase()} / ${gameIdentities[selected].genre}`
+            : "ACM-VIT ORGANIZING COMMITTEE SELECTIONS ’27"}
         </p>
         <h1>
-          {selected === "cc" ? (
-            <>
-              COMPETITIVE
-              <br />
-              CODING
-            </>
-          ) : (
-            item.title
-          )}
+          {isDomain(selected)
+            ? domainById[selected].name.toUpperCase()
+            : item.title}
         </h1>
         <h2>{item.subtitle}</h2>
         <p className="experience-description">{item.description}</p>
+        {isDomain(selected) && (
+          <p className="game-capabilities">
+            {domainById[selected].areas.join(" · ")}
+          </p>
+        )}
         <button className="launch-button" onClick={() => onLaunch(selected)}>
           {selected === "arcade"
             ? "Start game"
@@ -105,7 +119,7 @@ export default function ConsoleHome({
           <ArrowRight size={22} />
         </button>
       </section>
-      <ExperiencePreview id={selected} />
+      {!isDomain(selected) && <ExperiencePreview id={selected} />}
     </div>
   );
 }

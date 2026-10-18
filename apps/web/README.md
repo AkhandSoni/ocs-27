@@ -4,9 +4,11 @@ Next.js / React / TypeScript / Three.js. See the [root README](../../README.md) 
 
 The console uses WebGPU by default through Three.js `WebGPURenderer`, with WebGL 2 fallback. There is no separate WebGPU runtime to install. `@webgpu/types` provides TypeScript declarations. Inspect `.room-stage[data-renderer]` for the active rendering backend. `?renderer=webgl` forces WebGL 2.
 
+Every browser launch and console power-on plays the short skippable boot sequence, then opens the player sign-in screen. Guest play remains available there. In Room view, click the physical console to power down to TV static; the onscreen controller exposes the DualSense controls and the standard Gamepad API uses the same navigation actions.
+
 The room retains the original optimized device models, perspective camera, CSS3D TV alignment, procedural furniture, lights, and model loader. The camera starts focused for usable controls. On narrow screens, the same console UI renders directly without the room. Graphics initialization failure also offers that direct mode.
 
-Domain previews use consistently sized SVG icons and selected-software contents. The weak room poster gallery and floating sculptures have been removed. No photographic domain representations or commercial game covers remain in the active experience.
+Domain previews use five distinct, authored SVG game worlds and matching jackets. System utilities keep their consistent SVG icon family. The art styles and their production references are defined in [the rule set](../../docs/art-direction/RULES.md). The weak room poster gallery and floating sculptures have been removed. No photographic domain representations or commercial game covers remain in the active experience.
 
 Retained asset credits:
 

@@ -4,8 +4,10 @@ import { ArrowRight, Eye, EyeOff, LoaderCircle } from "lucide-react";
 import type { Student } from "./useLibrary";
 export default function AuthPanel({
   onSuccess,
+  onGuest,
 }: {
   onSuccess: (student: Student) => void;
+  onGuest?: () => void;
 }) {
   const [mode, setMode] = useState<"signin" | "register">("signin"),
     [name, setName] = useState(""),
@@ -172,6 +174,11 @@ export default function AuthPanel({
           ? "New player? Create an account"
           : "Already have an account? Sign in"}
       </button>
+      {onGuest && (
+        <button className="startup-guest-button" onClick={onGuest}>
+          Continue as guest
+        </button>
+      )}
       <small>
         Local console account. No email verification or external account
         provider.

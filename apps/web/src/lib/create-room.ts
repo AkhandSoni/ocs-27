@@ -24,6 +24,7 @@ export type RoomCallbacks = {
   onReady: (renderer: "WebGPU" | "WebGL 2") => void;
   onError: (message: string) => void;
   onAssetError: (message: string) => void;
+  onConsolePower: () => void;
 };
 
 /** A single camera drives the GPU scene and the accessible, interactive TV plane. */
@@ -106,21 +107,39 @@ export async function createRoom(
   controllerElement.className = "physical-controller";
   controllerElement.setAttribute("role", "group");
   controllerElement.setAttribute("aria-label", "Physical room controller");
-  const controllerButtons: [ControllerAction, string, string][] = [
-    ["up", "↑", "Move up"],
-    ["left", "←", "Move left"],
-    ["right", "→", "Move right"],
-    ["down", "↓", "Move down"],
-    ["confirm", "×", "Confirm"],
-    ["back", "○", "Back"],
-    ["home", "⌂", "Home"],
+  const controllerButtons: [ControllerAction, string, string, string][] = [
+    ["left", "L2", "l2", "L2 trigger · previous"],
+    ["left", "L1", "l1", "L1 · previous"],
+    ["right", "R1", "r1", "R1 · next"],
+    ["right", "R2", "r2", "R2 trigger · next"],
+    ["up", "↑", "up", "D-pad up"],
+    ["left", "←", "left", "D-pad left"],
+    ["right", "→", "right", "D-pad right"],
+    ["down", "↓", "down", "D-pad down"],
+    ["help", "Create", "create", "Create · help"],
+    ["home", "⌂", "touchpad", "Touchpad · console home"],
+    ["system", "Options", "options", "Options · control center"],
+    ["confirm", "L3", "l3", "Left stick click · select"],
+    ["confirm", "R3", "r3", "Right stick click · select"],
+    ["up", "↑", "lst-up", "Left stick up"],
+    ["down", "↓", "lst-down", "Left stick down"],
+    ["left", "←", "lst-left", "Left stick left"],
+    ["right", "→", "lst-right", "Left stick right"],
+    ["up", "↑", "rst-up", "Right stick up"],
+    ["down", "↓", "rst-down", "Right stick down"],
+    ["left", "←", "rst-left", "Right stick left"],
+    ["right", "→", "rst-right", "Right stick right"],
+    ["back", "□", "square", "Square · back"],
+    ["home", "△", "triangle", "Triangle · home"],
+    ["back", "○", "circle", "Circle · back"],
+    ["confirm", "×", "cross", "Cross · select"],
   ];
-  controllerButtons.forEach(([action, symbol, label]) => {
+  controllerButtons.forEach(([action, symbol, position, label]) => {
     const button = document.createElement("button");
-    button.className = `physical-${action}`;
+    button.className = `physical-${position}`;
     button.textContent = symbol;
     button.dataset.action = action;
-    button.setAttribute("aria-label", `Room controller ${label.toLowerCase()}`);
+    button.setAttribute("aria-label", `Room controller ${label}`);
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.setPointerCapture(event.pointerId);
@@ -230,6 +249,7 @@ export async function createRoom(
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const models: THREE.Object3D[] = [];
   const mixers: THREE.AnimationMixer[] = [];
+  let consoleModel: THREE.Object3D | null = null;
 
   async function addModel(
     path: string,
@@ -257,6 +277,7 @@ export async function createRoom(
       placement.position.copy(position);
       placement.position.y += height / 2;
       placement.rotation.copy(rotation);
+      if (path === "/models/ps5-optimized.glb") consoleModel = placement;
       model.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.castShadow = true;
@@ -335,6 +356,18 @@ export async function createRoom(
     pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
     pointerY = (event.clientY / window.innerHeight - 0.5) * 2;
   }
+  const raycaster = new THREE.Raycaster();
+  function onCanvasPointerDown(event: PointerEvent) {
+    if (!consoleModel || event.button !== 0) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const point = new THREE.Vector2(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    raycaster.setFromCamera(point, camera);
+    if (raycaster.intersectObject(consoleModel, true).length)
+      callbacks.onConsolePower();
+  }
   function onVisibility() {
     visible = !document.hidden;
     needsRender = true;
@@ -344,6 +377,7 @@ export async function createRoom(
   }
   reducedMotion.addEventListener("change", onMotionChange);
   window.addEventListener("pointermove", onPointer, { passive: true });
+  renderer.domElement.addEventListener("pointerdown", onCanvasPointerDown);
   document.addEventListener("visibilitychange", onVisibility);
 
   const accentTarget = new THREE.Color("#d4b26e");
@@ -464,6 +498,10 @@ export async function createRoom(
       observer.disconnect();
       intersectionObserver.disconnect();
       window.removeEventListener("pointermove", onPointer);
+      renderer.domElement.removeEventListener(
+        "pointerdown",
+        onCanvasPointerDown,
+      );
       document.removeEventListener("visibilitychange", onVisibility);
       reducedMotion.removeEventListener("change", onMotionChange);
       window.removeEventListener(

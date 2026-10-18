@@ -1012,6 +1012,87 @@
   background: #04090f99;
   animation: console-fade 0.2s ease;
 }
+.startup-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 28px;
+  background: #08111bea;
+  animation: console-fade 0.2s ease;
+}
+.startup-card {
+  width: min(480px, 100%);
+  padding: 36px 42px;
+  border: 1px solid #ffffff25;
+  background: #0d1721f7;
+  box-shadow: 0 24px 80px #0008;
+}
+.startup-card > .system-kicker {
+  margin: 0 0 26px;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+.startup-screen .auth-native > p {
+  margin: 0 0 22px;
+}
+.startup-screen .auth-native .console-field {
+  margin: 18px 0;
+}
+.startup-screen .auth-native .quiet-button {
+  margin-top: 18px;
+}
+.startup-guest-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  border: 1px solid #ffffff2c;
+  color: #d4dce1;
+  font-size: 13px;
+}
+.startup-guest-button:hover,
+.startup-guest-button:focus-visible {
+  background: #ffffff0b;
+  color: white;
+}
+.startup-player {
+  text-align: center;
+}
+.startup-player-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin: 6px auto 18px;
+  place-items: center;
+  border: 1px solid #ffffff30;
+  border-radius: 50%;
+  color: #d6c18d;
+}
+.startup-player h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 400;
+}
+.startup-player p,
+.startup-error {
+  color: #a3b3c2;
+  font-size: 13px;
+}
+.startup-player .launch-button {
+  margin: 22px auto 0;
+}
+.startup-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  display: grid;
+  place-items: center;
+  background: #08111bea;
+  color: #a3b3c2;
+  font-size: 13px;
+}
 .system-panel {
   position: absolute;
   right: 0;

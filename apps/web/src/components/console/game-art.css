@@ -1,0 +1,331 @@
+@font-face {
+  font-family: "OCS Assembly";
+  src: url("/console/fonts/BebasNeue-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* Rules: docs/art-direction/RULES.md. OS chrome is shared; game art is not. */
+.home-world,
+.domain-world {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  animation: world-select 0.22s ease both;
+}
+.home-world > svg,
+.domain-world > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.world-legibility {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #101923 4%,
+    #101923f7 30%,
+    #101923d9 44%,
+    #10192350 64%,
+    #10192300 81%
+  );
+}
+.console-home > .home-world {
+  z-index: 0;
+}
+.experience-rail,
+.selection-caption,
+.experience-title,
+.experience-preview {
+  z-index: 1;
+}
+.game-cover {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #24353d;
+}
+.game-cover > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cover-shade {
+  position: absolute;
+  inset: 40% 0 0;
+  background: linear-gradient(0deg, #081018f5, transparent);
+}
+.cover-title {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 24px;
+  color: #fff5df;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.cartridge.selected .cover-title {
+  font-size: 17px;
+  bottom: 33px;
+}
+.cartridge > .game-cover + .cartridge-name {
+  color: #d0d8dd;
+}
+.cartridge-index {
+  z-index: 2;
+  padding: 2px 3px;
+  background: #0d1821b0;
+  border-radius: 2px;
+  color: #dce5eb;
+}
+.cartridge-name {
+  z-index: 2;
+}
+.cartridge-check {
+  z-index: 2;
+}
+.cover-tech .cover-title {
+  font-family: "OCS Assembly", Impact, "Arial Narrow", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  color: #f5dc9c;
+}
+.cover-research .cover-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: #f6d9b1;
+}
+.cover-management .cover-title {
+  font-family: Arial, sans-serif;
+  font-weight: 900;
+  max-width: 100px;
+  margin: auto;
+  color: #f9f0d7;
+}
+.cover-design .cover-title {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: #ffe7c6;
+}
+.cover-cc .cover-title {
+  font-family: monospace;
+  letter-spacing: -0.4px;
+  color: #d8c8ed;
+}
+.experience-tech .experience-title h1,
+.experience-tech .game-hub-title {
+  font-family: "OCS Assembly", Impact, "Arial Narrow", sans-serif;
+  letter-spacing: 1px;
+  font-size: 91px;
+  font-weight: 400;
+  color: #f2dca7;
+}
+.experience-research .experience-title h1,
+.experience-research .game-hub-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 65px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: #f5d3ae;
+}
+.experience-management .experience-title h1,
+.experience-management .game-hub-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 61px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: #f7efd9;
+  max-width: 570px;
+  margin: 16px 0;
+}
+.experience-design .experience-title h1,
+.experience-design .game-hub-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 82px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -3px;
+  color: #f8dfb9;
+}
+.experience-cc .experience-title h1,
+.experience-cc .game-hub-title {
+  font-family: "Courier New", monospace;
+  font-size: 71px;
+  font-weight: 700;
+  letter-spacing: -3px;
+  line-height: 1.1;
+  color: #dac9ef;
+}
+.experience-cc .experience-title.long-title {
+  top: 239px;
+}
+.experience-title > .system-kicker {
+  color: #bdc8ce;
+  letter-spacing: 2px;
+}
+.game-capabilities {
+  color: #c0cbd2;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.4px;
+  margin: 0 0 18px;
+  max-width: 560px;
+}
+.experience-description {
+  margin-bottom: 12px;
+}
+.selection-caption > span:last-child {
+  color: #e7ecec;
+  background: #111b24b8;
+  padding: 3px 5px;
+  border-radius: 2px;
+  opacity: 1;
+}
+.domain-world {
+  z-index: 0;
+  opacity: 0.7;
+}
+.domain-world .world-legibility {
+  background: linear-gradient(
+    90deg,
+    #101923 8%,
+    #101923fa 34%,
+    #101923e8 52%,
+    #10192370 71%,
+    #10192320
+  );
+}
+.domain-app > :not(.domain-world) {
+  position: relative;
+  z-index: 1;
+}
+.domain-app > .domain-apply {
+  position: absolute;
+}
+.domain-jacket {
+  position: relative;
+  width: 65px;
+  height: 73px;
+  overflow: hidden;
+  border: 1px solid #ffffff45;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.domain-jacket .cover-title {
+  font-size: 8px;
+  bottom: 8px;
+}
+.experience-tech .native-app .game-hub-title,
+.experience-research .native-app .game-hub-title,
+.experience-management .native-app .game-hub-title,
+.experience-design .native-app .game-hub-title,
+.experience-cc .native-app .game-hub-title {
+  font-size: 40px;
+  letter-spacing: 0;
+  margin: 0;
+}
+@keyframes world-select {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 680px) {
+  .game-capabilities {
+    font-size: 9px;
+    margin-bottom: 18px;
+  }
+  .home-world {
+    inset: 100px 0 0;
+    opacity: 0.45;
+  }
+  .home-world > svg {
+    width: 175%;
+    margin-left: -75%;
+  }
+  .world-legibility {
+    background: linear-gradient(0deg, #101923 10%, #101923d9 48%, #10192380);
+  }
+  .experience-tech .experience-title h1 {
+    font-size: 64px;
+  }
+  .experience-research .experience-title h1 {
+    font-size: 36px;
+  }
+  .experience-management .experience-title h1 {
+    font-size: 38px;
+    max-width: 310px;
+    letter-spacing: -1px;
+  }
+  .experience-design .experience-title h1 {
+    font-size: 57px;
+    letter-spacing: -2px;
+  }
+  .experience-cc .experience-title.long-title {
+    top: 220px;
+  }
+  .experience-cc .experience-title h1 {
+    font-size: 41px;
+    letter-spacing: -2px;
+  }
+  .cartridge.selected .cover-title {
+    font-size: 13px;
+    bottom: 27px;
+  }
+  .cover-title {
+    font-size: 7px;
+    bottom: 20px;
+    left: 3px;
+    right: 3px;
+  }
+  .domain-jacket {
+    width: 46px;
+    height: 56px;
+  }
+  .domain-jacket .cover-title {
+    font-size: 6px;
+    bottom: 8px;
+  }
+  .domain-world {
+    opacity: 0.2;
+  }
+  .domain-world > svg {
+    width: 180%;
+    margin-left: -80%;
+  }
+  .experience-tech .native-app .game-hub-title,
+  .experience-research .native-app .game-hub-title,
+  .experience-management .native-app .game-hub-title,
+  .experience-design .native-app .game-hub-title,
+  .experience-cc .native-app .game-hub-title {
+    font-size: 27px;
+  }
+  .domain-app > .domain-apply {
+    position: sticky;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-world,
+  .domain-world {
+    animation: none;
+  }
+}
+
+/* Forms keep the shared OS controls; only the current domain accent follows. */
+.is-writing .application-heading > span:first-child {
+  color: var(--selection);
+}
+.is-writing .step-track > i[data-active="true"] {
+  background: var(--selection);
+}

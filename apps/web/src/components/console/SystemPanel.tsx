@@ -4,6 +4,7 @@ import {
   X,
   LogOut,
   RotateCcw,
+  Power,
   UserRound,
   Gamepad2,
   Monitor,
@@ -19,6 +20,7 @@ export default function SystemPanel({
   onLogout,
   onRestart,
   onRoom,
+  onPowerOff,
   onSignIn,
   onReset,
 }: {
@@ -30,6 +32,7 @@ export default function SystemPanel({
   onLogout: () => Promise<void>;
   onRestart: () => void;
   onRoom: () => void;
+  onPowerOff: () => void;
   onSignIn: () => void;
   onReset: () => void;
 }) {
@@ -153,6 +156,10 @@ export default function SystemPanel({
               <button onClick={onRestart}>
                 <RotateCcw size={20} />
                 Restart console
+              </button>
+              <button onClick={onPowerOff}>
+                <Power size={20} />
+                Turn off console
               </button>
               <button onClick={() => setReset(true)}>
                 <RotateCcw size={20} />

@@ -5,7 +5,10 @@ export type ControllerAction =
   | "down"
   | "confirm"
   | "back"
-  | "home";
+  | "home"
+  | "help"
+  | "system"
+  | "controller";
 export const controllerKeys: Record<string, ControllerAction> = {
   ArrowLeft: "left",
   ArrowRight: "right",
@@ -15,6 +18,13 @@ export const controllerKeys: Record<string, ControllerAction> = {
   Escape: "back",
   Backspace: "back",
   Home: "home",
+  q: "left",
+  e: "right",
+  z: "left",
+  c: "right",
+  " ": "confirm",
+  f: "help",
+  g: "system",
 };
 export function controllerAction(action: ControllerAction) {
   window.dispatchEvent(

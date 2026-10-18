@@ -3,7 +3,9 @@ import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { domainById, domainInfo, experiences } from "./content";
 import type { DomainId } from "@/lib/recruitment";
-import Glyph from "./Glyph";
+import GameCover from "./art/GameCover";
+import DomainArtwork from "./art/DomainArtwork";
+import { gameIdentities } from "./game-identities";
 import { useExperienceInput } from "./ConsoleInput";
 export default function DomainExperience({
   id,
@@ -29,11 +31,20 @@ export default function DomainExperience({
   });
   return (
     <section className="native-app domain-app" data-domain={id}>
+      <div className="domain-world">
+        <DomainArtwork id={id} />
+        <div className="world-legibility" />
+      </div>
       <div className="app-heading">
-        <Glyph id={id} />
+        <div className="domain-jacket">
+          <GameCover id={id} />
+        </div>
         <div>
-          <p>RECRUITMENT EXPERIENCE / {d.number}</p>
-          <h1>{id === "cc" ? "Competitive Coding" : d.name}</h1>
+          <p>
+            {d.name.toUpperCase()} / DOMAIN {d.number} /{" "}
+            {gameIdentities[id].genre}
+          </p>
+          <h1 className="game-hub-title">{d.name.toUpperCase()}</h1>
         </div>
       </div>
       <nav className="app-tabs" aria-label="Domain sections">

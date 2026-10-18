@@ -15,7 +15,10 @@ import ShowcaseExperience from "./ShowcaseExperience";
 import ArcadeExperience from "./ArcadeExperience";
 import StudentExperience from "./StudentExperience";
 import SystemPanel from "./SystemPanel";
+import StartupScreen from "./StartupScreen";
+import { gameIdentities, isDomain } from "./game-identities";
 import "./console.css";
+import "./game-art.css";
 
 type Route =
   | { screen: "home" }
@@ -25,21 +28,30 @@ export default function ConsoleShell({
   ready,
   onAccent,
   onRoom,
+  onPowerOff,
+  onStartupChange,
 }: {
   ready: boolean;
   onAccent: (color: string) => void;
   onRoom: () => void;
+  onPowerOff: () => void;
+  onStartupChange: (active: boolean) => void;
 }) {
   const [route, setRoute] = useState<Route>({ screen: "home" }),
     [selected, setSelected] = useState<ExperienceId>("tech");
   const [panel, setPanel] = useState<"auth" | "system" | "help" | null>(null),
     [boot, setBoot] = useState(true),
+    [startup, setStartup] = useState(true),
+    [sessionChecked, setSessionChecked] = useState(false),
     [student, setStudent] = useState<Student | null>(null),
     [time, setTime] = useState(""),
     [sessionError, setSessionError] = useState("");
   const root = useRef<HTMLDivElement>(null),
     childInput = useRef<InputHandler | null>(null);
   const library = useLibrary(student);
+  const selectionColor = isDomain(selected)
+    ? gameIdentities[selected].accent
+    : experiences[selected].color;
   const register = useCallback((handler: InputHandler) => {
     childInput.current = handler;
     return () => {
@@ -48,15 +60,9 @@ export default function ConsoleShell({
   }, []);
   const inputContext = useMemo(() => ({ register }), [register]);
   const completeBoot = useCallback(() => {
-    try {
-      sessionStorage.setItem("ocs:boot:v2", "1");
-    } catch {}
     setBoot(false);
   }, []);
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("ocs:boot:v2") === "1") setBoot(false);
-    } catch {}
     const abort = new AbortController();
     void fetch("/api/auth/session", {
       credentials: "same-origin",
@@ -69,10 +75,16 @@ export default function ConsoleShell({
             "Account service unavailable. You can still explore as a guest.",
           );
         const d = await r.json();
-        if (!abort.signal.aborted) setStudent(d.user);
+        if (!abort.signal.aborted) {
+          if (d.user) mergeGuest(d.user);
+          setStudent(d.user);
+        }
       })
       .catch((e) => {
         if (!abort.signal.aborted) setSessionError(e.message);
+      })
+      .finally(() => {
+        if (!abort.signal.aborted) setSessionChecked(true);
       });
     return () => abort.abort();
   }, []);
@@ -90,11 +102,14 @@ export default function ConsoleShell({
     return () => clearInterval(timer);
   }, []);
   useEffect(() => {
-    onAccent(experiences[selected].color);
-  }, [selected, onAccent]);
+    onAccent(selectionColor);
+  }, [selectionColor, onAccent]);
   useEffect(() => {
-    if (!boot) root.current?.focus({ preventScroll: true });
-  }, [route, boot]);
+    if (!boot && !startup) root.current?.focus({ preventScroll: true });
+  }, [route, boot, startup]);
+  useEffect(() => {
+    onStartupChange(boot || startup);
+  }, [boot, startup, onStartupChange]);
   function launch(id: ExperienceId = selected) {
     setSelected(id);
     if (["showcase", "arcade", "applications"].includes(id))
@@ -124,7 +139,17 @@ export default function ConsoleShell({
   useEffect(() => {
     function control(e: Event) {
       const action = (e as CustomEvent<ControllerAction>).detail;
-      if (boot) return;
+      if (boot || startup) return;
+      if (action === "help" || action === "system") {
+        setPanel((current) =>
+          current ? null : action === "help" ? "help" : "system",
+        );
+        return;
+      }
+      if (action === "controller") {
+        window.dispatchEvent(new Event("ocs:show-controller"));
+        return;
+      }
       if (action === "home") {
         home();
         return;
@@ -203,10 +228,11 @@ export default function ConsoleShell({
     }
     window.addEventListener("ocs:controller-action", control);
     return () => window.removeEventListener("ocs:controller-action", control);
-  }, [route, selected, panel, boot]);
+  }, [route, selected, panel, boot, startup]);
   function authenticated(user: Student) {
     mergeGuest(user);
     setStudent(user);
+    setStartup(false);
     setPanel(null);
     setSessionError("");
   }
@@ -230,9 +256,7 @@ export default function ConsoleShell({
         ref={root}
         tabIndex={-1}
         data-console-screen={route.screen}
-        style={
-          { "--selection": experiences[selected].color } as React.CSSProperties
-        }
+        style={{ "--selection": selectionColor } as React.CSSProperties}
         aria-label="ACM VIT OCS gaming console"
       >
         {boot ? (
@@ -247,8 +271,8 @@ export default function ConsoleShell({
           <>
             <div
               className="console-surface"
-              inert={panel !== null}
-              aria-hidden={panel ? true : undefined}
+              inert={panel !== null || startup}
+              aria-hidden={panel !== null || startup ? true : undefined}
             >
               <header className="console-chrome">
                 <button
@@ -441,14 +465,29 @@ export default function ConsoleShell({
                 onRestart={() => {
                   setPanel(null);
                   setRoute({ screen: "home" });
+                  setStartup(true);
                   setBoot(true);
                 }}
                 onRoom={() => {
                   onRoom();
                   setPanel(null);
                 }}
+                onPowerOff={onPowerOff}
               />
             )}
+            {startup &&
+              (sessionChecked ? (
+                <StartupScreen
+                  student={student}
+                  sessionError={sessionError}
+                  onAuthenticate={authenticated}
+                  onContinue={() => setStartup(false)}
+                />
+              ) : (
+                <div className="startup-loading" role="status">
+                  Checking player profile…
+                </div>
+              ))}
           </>
         )}
       </div>

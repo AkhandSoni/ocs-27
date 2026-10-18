@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { Monitor } from "lucide-react";
 import ConsoleShell from "./console/ConsoleShell";
 import ControllerControls from "./ControllerControls";
+import StaticScreen from "./console/StaticScreen";
 import type { RoomController } from "@/lib/create-room";
 export default function Lounge() {
   const stage = useRef<HTMLDivElement>(null),
@@ -12,7 +13,9 @@ export default function Lounge() {
     [ready, setReady] = useState(false),
     [error, setError] = useState(""),
     [flat, setFlat] = useState(false),
-    [focused, setFocused] = useState(true);
+    [focused, setFocused] = useState(true),
+    [powered, setPowered] = useState(true),
+    [startupInProgress, setStartupInProgress] = useState(true);
   useEffect(() => {
     const media = matchMedia("(max-width:680px)");
     const change = () => setFlat(media.matches);
@@ -45,6 +48,9 @@ export default function Lounge() {
           onAssetError(message) {
             console.warn(message);
           },
+          onConsolePower() {
+            setPowered((value) => !value);
+          },
         });
         if (cancelled) created.dispose();
         else {
@@ -68,6 +74,10 @@ export default function Lounge() {
     (color: string) => controller.current?.setAccent(color),
     [],
   );
+  const powerOff = useCallback(() => {
+    setStartupInProgress(true);
+    setPowered(false);
+  }, []);
   const toggleRoom = useCallback(
     () =>
       setFocused((current) => {
@@ -106,15 +116,35 @@ export default function Lounge() {
       {!flat &&
         host &&
         createPortal(
-          <ConsoleShell ready={ready} onAccent={accent} onRoom={toggleRoom} />,
+          powered ? (
+            <ConsoleShell
+              ready={ready}
+              onAccent={accent}
+              onRoom={toggleRoom}
+              onPowerOff={powerOff}
+              onStartupChange={setStartupInProgress}
+            />
+          ) : (
+            <StaticScreen onPower={() => setPowered(true)} />
+          ),
           host,
         )}
       {flat && (
         <div className="flat-console">
-          <ConsoleShell ready onAccent={accent} onRoom={() => setFlat(false)} />
+          {powered ? (
+            <ConsoleShell
+              ready
+              onAccent={accent}
+              onRoom={() => setFlat(false)}
+              onPowerOff={powerOff}
+              onStartupChange={setStartupInProgress}
+            />
+          ) : (
+            <StaticScreen onPower={() => setPowered(true)} />
+          )}
         </div>
       )}
-      <ControllerControls />
+      {powered && !startupInProgress && <ControllerControls />}
       {!flat && ready && (
         <button className="room-view-toggle" onClick={toggleRoom}>
           <Monitor size={15} />

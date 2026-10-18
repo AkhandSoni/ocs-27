@@ -24,20 +24,20 @@ Inspected public entry screens at [OCS ’25](https://os.acmvit.in) and [OCS ’
 - Code 2 Create, Reverse Coding and Cryptic Hunt appear in the previous OCS chapter source. The collection links to that source rather than inventing annual dates, outcomes, attendance, awards or project statistics.
 - Domain application questions and recruitment instructions are authored prototype content, explicitly identified in the application. Official ’27 dates and later rounds need chapter confirmation.
 
-## Asset audit and final art direction
+## Initial asset audit (superseded by the game-identity study)
 
-| Asset / system | Decision | Function |
-| --- | --- | --- |
-| Original optimized hardware models | Retain with existing CC BY attribution | Physical console, controller and TV context |
-| Original walnut material / room furniture | Retain with CC0 source record | Believable room materials |
-| Previous domain and group photos | Exclude from active branch | A group photo does not identify a domain |
-| Commercial game covers and fake launch pages | Remove | Replace with actual OCS software and a playable original game |
-| Floating metal gimbals / orbit sculptures / knots | Remove | They added visual noise without explaining selection |
-| Decorative framed poster gallery | Remove | Simplify the room around the operating TV |
-| Per-domain gradients, rainbow colours and tilted cases | Remove | One slate palette, one accent, clean vertical alignment |
-| Custom ACM-like monogram | Replace | Use the actual chapter lockup and diamond from OCS ’26 |
-| Domain symbols | Standardize | One Lucide SVG family, square proportions and 1.5-unit strokes |
-| Project/event identifiers | Source from chapter repos | Real UniPool, Code 2 Create, Reverse Coding and Cryptic Hunt artwork |
+| Asset / system                                         | Decision                               | Function                                                             |
+| ------------------------------------------------------ | -------------------------------------- | -------------------------------------------------------------------- |
+| Original optimized hardware models                     | Retain with existing CC BY attribution | Physical console, controller and TV context                          |
+| Original walnut material / room furniture              | Retain with CC0 source record          | Believable room materials                                            |
+| Previous domain and group photos                       | Exclude from active branch             | A group photo does not identify a domain                             |
+| Commercial game covers and fake launch pages           | Remove                                 | Replace with actual OCS software and a playable original game        |
+| Floating metal gimbals / orbit sculptures / knots      | Remove                                 | They added visual noise without explaining selection                 |
+| Decorative framed poster gallery                       | Remove                                 | Simplify the room around the operating TV                            |
+| Per-domain gradients, rainbow colours and tilted cases | Remove                                 | One slate palette, one accent, clean vertical alignment              |
+| Custom ACM-like monogram                               | Replace                                | Use the actual chapter lockup and diamond from OCS ’26               |
+| Domain symbols                                         | Standardize                            | One Lucide SVG family, square proportions and 1.5-unit strokes       |
+| Project/event identifiers                              | Source from chapter repos              | Real UniPool, Code 2 Create, Reverse Coding and Cryptic Hunt artwork |
 
 `Glyph.tsx` is the single domain icon entry point. `BrandMark.tsx` renders the actual chapter lockup. `ExperiencePreview.tsx` identifies the selected software and lists its contents. All text, controls and focus indicators remain HTML/CSS. No image generation, baked controls, particles, random machinery, continuous decorative animation, neon gradients or generated illustrations are used. The only GPU scene is the retained physical console room.
 
@@ -45,15 +45,21 @@ Studied official production references: [Xbox Home](https://news.xbox.com/en-us/
 
 Asset URLs and provenance: [console asset manifest](../apps/web/public/console/README.md), [chapter references](../apps/web/public/ocs/SOURCES.md). The optional historical mascot is preserved but unused, rather than inserted as filler.
 
+## Current game art direction
+
+After review, the initial icon-based domain treatment was replaced. The user asked for a different game identity per domain, while preserving shared console rules. The reference study and written rules precede asset creation: [art direction rules](art-direction/RULES.md).
+
+The five domain worlds keep their distinct automation, expedition, route-planning, papercraft and puzzle art directions, while every visible title uses the ACM recruitment domain name. Covers, selected backgrounds and domain hubs use the same original SVG scene. System utilities keep their shared icons. No commercial game art is served; references are studies of principles. Forms remain neutral, with only a domain accent.
+
 ## Operational prototype boundaries
 
-Implemented: guest browsing; five domain previews and native experiences; six-step forms; HTML validation and review; local drafts; sign-in/create-account at protected submission; account-isolated local receipts; storage errors; logout/reset; source-linked collection; playable Snake; keyboard/mouse/touch, room and onscreen controllers; optional standard gamepad polling; mobile console; reduced motion.
+Implemented: per-launch boot and optional sign-in; guest browsing; five domain previews and native experiences; six-step forms; HTML validation and review; local drafts; sign-in/create-account at protected submission; account-isolated local receipts; storage errors; logout/reset/power-off; animated TV static and console power-on; source-linked collection; playable Snake; keyboard/mouse/touch, room and full onscreen controller; optional standard gamepad polling; mobile console; reduced motion.
 
 Accounts are real local SQLite accounts. Applications, Snake scores and receipts are browser-local. No applications are sent to ACM-VIT, and no interview/status backend is represented as live. There is no official OCS ’27 schedule, server-side reviewer dashboard, verified university identity, password recovery/email service, or cross-device application sync. Shared browser storage is unsuitable as a production recruitment authority.
 
 ## Verification and screenshots
 
-Use commands in the [README](../README.md). Browser tests cover boot, all domains, in-console forms, keyboard editing/back, guest → account submission, persisted receipts, account isolation, collection navigation, controller buttons, Snake scoring/pause/collision/high scores, storage failure, room WebGPU/fallback, and a 390px mobile viewport. Existing auth tests remain intact; Snake tests cover engine edge cases.
+Use commands in the [README](../README.md). Browser tests cover boot and login/guest entry, all domains, in-console forms, keyboard editing/back, guest → account submission, persisted receipts, account isolation, collection navigation, power-off/static/restart, 25 controller inputs, Snake scoring/pause/collision/high scores, storage failure, room WebGPU/fallback, and a 390px mobile viewport. Existing auth tests remain intact; Snake tests cover engine edge cases.
 
 The browser runner launches an isolated Next server and temporary SQLite database, cleans the database at teardown, records page exceptions, and retains failure traces. Headless Chromium uses a software GPU adapter; hardware-specific gamepad support and sustained performance across student laptops have not been measured.
 
@@ -69,12 +75,12 @@ Final verification (2026-10-18):
 
 The final room lighting uses restrained neutral screen reflection and the existing warm practical lights. The previous pink/blue split, emissive light strips, pulse, redundant poster gallery, and unused PlayStation font are removed. Reduced-motion changes mark the scene dirty so camera fit updates immediately.
 
-| Console state | Capture |
-| --- | --- |
-| Startup | [startup](screenshots/startup.png) |
-| Home | [home](screenshots/home.png) |
-| Domain | [selected domain](screenshots/selected-domain.png) |
-| Application | [application](screenshots/application.png) |
-| Arcade | [arcade](screenshots/arcade.png), [completed run](screenshots/arcade-played.png) |
-| Chapter collection | [verified project artwork](screenshots/collection.png) |
-| Mobile form | [mobile application](screenshots/mobile-application.png) |
+| Console state      | Capture                                                                          |
+| ------------------ | -------------------------------------------------------------------------------- |
+| Startup            | [startup](screenshots/startup.png)                                               |
+| Home               | [home](screenshots/home.png)                                                     |
+| Domain             | [selected domain](screenshots/selected-domain.png)                               |
+| Application        | [application](screenshots/application.png)                                       |
+| Arcade             | [arcade](screenshots/arcade.png), [completed run](screenshots/arcade-played.png) |
+| Chapter collection | [verified project artwork](screenshots/collection.png)                           |
+| Mobile form        | [mobile application](screenshots/mobile-application.png)                         |
