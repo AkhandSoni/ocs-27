@@ -1,0 +1,87 @@
+@font-face { font-family: "PS Console"; src: url("/fonts/PsBold.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+.console, .home { position: relative; width: 1280px; height: 720px; overflow: hidden; pointer-events: auto; }
+.console { color: #f5f6f8; background: #18191c; font-family: "Arial", "Helvetica Neue", sans-serif; font-weight: 300; -webkit-font-smoothing: antialiased; isolation: isolate; }
+.console *, .console *::before, .console *::after { box-sizing: border-box; }
+.console button, .console input { font: inherit; }
+.console button { color: inherit; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.console button:disabled, .console input:disabled { cursor: wait; opacity: .55; }
+.console button:focus-visible { outline: 2px solid #fbfcff; outline-offset: 6px; }
+.console input:focus { outline: none; }
+.particleCanvas { position: absolute; inset: 0; z-index: -3; display: block; width: 1280px; height: 720px; }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 48% 38%, transparent 15%, #03040542 100%), linear-gradient(0deg, #090a0c30, transparent 30%); z-index: -1; }
+.ps5Logo { display: flex; align-items: center; gap: 15px; color: #f5f7fa; }
+.ps5Logo > svg:first-child { width: 56px; height: 56px; flex: 0 0 auto; }
+.ps5Logo > svg:last-child { width: 163px; height: 35px; }
+.checking { position: absolute; top: 354px; left: 612px; display: flex; gap: 8px; }
+.checking span { width: 5px; height: 5px; border-radius: 50%; background: #f2f2f7aa; animation: checking 1.3s ease-in-out infinite; }
+.checking span:nth-child(2) { animation-delay: .15s; }.checking span:nth-child(3) { animation-delay: .3s; }
+.bootSequence { position: absolute; inset: 0; }
+.bootFamilyMark { position: absolute; left: 558px; top: 270px; width: 164px; height: 164px; color: #fff; filter: drop-shadow(0 0 28px #d6e5ff0a); animation: familyReveal 17.4s ease-in-out both; }
+.bootPaused .bootSequence { opacity: 0; }.bootPaused .bootSequence * { animation-play-state: paused !important; }
+.screenReader { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.userSelection { position: absolute; inset: 0; animation: contentIn .65s ease both; }
+.systemTime { position: absolute; top: 49px; right: 54px; font-size: 21px; font-weight: 300; color: #f2f4f9df; letter-spacing: -.4px; }
+.userHeading { text-align: center; position: absolute; top: 133px; left: 0; right: 0; }
+.userHeading h1 { font-weight: 300; font-size: 35px; letter-spacing: -.65px; margin: 0; line-height: 1.3; }
+.userHeading p { font-size: 18px; color: #e0e4ecce; font-weight: 300; margin: 19px 0 0; letter-spacing: .1px; }
+.profiles { display: flex; gap: 48px; justify-content: center; position: absolute; top: 328px; left: 55px; right: 55px; align-items: flex-start; }
+.profileCard { width: 158px; flex: 0 0 158px; position: relative; text-align: center; padding: 8px 0 0; outline: none !important; transition: transform .22s; }
+.chosenController { position: absolute; top: -48px; left: calc(50% - 12px); opacity: 0; color: #f1f4fa; transition: opacity .2s; }.profileCard:focus-visible .chosenController, .profileCard:hover .chosenController { opacity: 1; }
+.profileImage, .addProfileCircle { position: relative; width: 114px; height: 114px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; transition: transform .25s, box-shadow .25s; }
+.profileImage::after, .addProfileCircle::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid transparent; transition: border .25s, box-shadow .25s; }
+.profileCard:hover .profileImage, .profileCard:focus-visible .profileImage, .profileCard:hover .addProfileCircle, .profileCard:focus-visible .addProfileCircle { transform: scale(1.1); }
+.profileCard:focus-visible .profileImage::after, .profileCard:hover .profileImage::after, .profileCard:focus-visible .addProfileCircle::after, .profileCard:hover .addProfileCircle::after { border-color: #f1f5ffdc; box-shadow: 0 0 0 3px #f5f9ff10, 0 0 30px #a1bdff21; }
+.avatar { display: grid; place-items: center; width: 100%; height: 100%; position: relative; border-radius: 50%; overflow: hidden; box-shadow: inset 0 0 0 1px #ffffff32, 0 7px 25px #0003; color: #fbfcff; background: #366ba0; }
+.avatar > svg { position: relative; z-index: 1; width: 60%; height: 60%; filter: drop-shadow(0 3px 5px #0004); }
+.avatarGlow { position: absolute; width: 120%; height: 90%; left: -50%; bottom: -26%; border-radius: 50%; background: #ffffff26; filter: blur(10px); }
+.avatarGlimmer { position: absolute; inset: 0; background: linear-gradient(145deg, #ffffff44, #ffffff00 45%, #020b3720 80%); border-radius: inherit; box-shadow: inset 0 0 0 1px #ffffff25; }
+.astro { background: radial-gradient(circle at 55% 45%, #65bbec, #1965b4 70%, #283d92); }.astro > svg { color: #f4f8ff; width: 65%; height: 65%; }
+.horizon { background: linear-gradient(145deg, #d0a484, #8e535c 60%, #353a69); }.cosmic { background: radial-gradient(circle at 35% 35%, #8197d4, #454679 75%); }
+.sunset { background: linear-gradient(145deg, #e4b774, #bb686d 55%, #804e88); }.forest { background: linear-gradient(145deg, #8fbaa5, #3b7c76 65%, #294b65); }.violet { background: linear-gradient(140deg, #ad8ace, #70579d 60%, #3b498b); }
+.onlineIndicator { position: absolute; right: 3px; bottom: 3px; width: 24px; height: 24px; background: #edf5f6; border-radius: 50%; color: #245b5b; display: grid; place-items: center; box-shadow: 0 0 0 3px #17273b; z-index: 2; }
+.profileName { display: block; font-size: 18px; font-weight: 400; line-height: 1.25; margin: 26px auto 0; max-width: 158px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 14px #0004; }
+.addProfileCircle { background: #dbe4f418; border: 1px solid #e7edfa47; box-shadow: inset 0 0 30px #a1c2ff08; }
+.addProfileCircle > svg { width: 44px; height: 44px; opacity: .9; }
+.selectionError { position: absolute; top: 615px; left: 160px; right: 160px; font-size: 12px; display: flex; gap: 8px; align-items: center; justify-content: center; color: #f4c8ba; }
+.consoleFooter { position: absolute; left: 58px; bottom: 34px; right: 59px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn .8s ease; }
+.pickerFooter { left: auto; right: 58px; bottom: 35px; }
+.powerButton { position: absolute; left: 615px; bottom: 28px; width: 50px; height: 45px; display: grid; place-items: center; border-radius: 4px; opacity: .82; }.powerButton:hover { background: #f0f5ff12 !important; opacity: 1; }
+.powerMenu { position: absolute; left: 520px; bottom: 85px; width: 240px; border: 1px solid #e2eaf94d; border-radius: 4px; background: #172235f5; box-shadow: 0 15px 40px #0006; padding: 8px; z-index: 5; animation: contentIn .2s ease; }.powerMenu > button { width: 100%; padding: 14px; display: flex; align-items: center; gap: 12px; font-size: 14px !important; border-radius: 2px; }.powerMenu > button:hover { background: #e2eaff12; }
+.consoleFooter > div { display: flex; align-items: center; gap: 10px; color: #e2e8f3b3; font-size: 12px; font-weight: 300; }
+.controllerKey { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #e2e8f37a; display: inline-grid; place-items: center; font-size: 19px; line-height: 1; color: #edf2fcce; font-family: Arial, sans-serif; font-weight: 300; }
+.footerBack { display: inline-flex; align-items: center; gap: 10px; margin-left: 18px; font-size: 12px !important; padding: 0; }
+.footerBack .controllerKey { font-size: 16px; }
+.consoleDesignation { font-family: "PS Console", sans-serif; font-size: 22px; letter-spacing: .5px; opacity: .55; }
+.formScreen .vignette { background: linear-gradient(0deg, #08090b65, transparent 90%), radial-gradient(ellipse at center, #15171910, #08090b30); }
+.authMain { position: absolute; inset: 0; animation: contentIn .45s ease both; }
+.backButton { position: absolute; left: 58px; top: 52px; display: flex; align-items: center; gap: 11px; font-size: 15px !important; color: #e8edf6bd !important; padding: 6px 0; }
+.authLogo { position: absolute; top: 40px; right: 58px; transform: scale(.67); transform-origin: right top; opacity: .85; }
+.authContent { position: absolute; top: 177px; left: 345px; width: 590px; }
+.authContent h1 { font-weight: 300; font-size: 35px; line-height: 1.25; letter-spacing: -.7px; margin: 0; color: #f4f6fc; }
+.accountContext { font-size: 13px; line-height: 1.4; margin: 10px 0 0; color: #d2d6df9c; font-weight: 300; letter-spacing: .1px; }
+.signInAvatar { width: 58px; height: 58px; position: absolute; top: -5px; left: -87px; }
+.authForm { margin: 24px 0 0; }
+.field { position: relative; display: block; height: 54px; width: 100%; margin-bottom: 18px; }
+.field > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.field input { width: 100%; height: 54px; background: #e9f1ff07; border: 1px solid #d4e0f15c; border-radius: 3px; padding: 0 17px; font-size: 16px; font-weight: 300; color: #f4f6fb; transition: border-color .2s, background .2s, box-shadow .2s; caret-color: #fff; }
+.field input::placeholder { color: #d5dff4a3; opacity: 1; }.field input:hover { border-color: #e9f0ff99; }.field input:focus { background: #e9f1ff0b; border-color: #f4f7ff; box-shadow: 0 0 0 2px #c4d9ff0b; }
+.field input:-webkit-autofill { -webkit-text-fill-color: #f4f6fb; -webkit-box-shadow: 0 0 0 100px #1c293b inset; caret-color: #fff; }
+.passwordField input { padding-right: 56px; }.passwordField > button { width: 47px; height: 52px; position: absolute; top: 1px; right: 1px; display: grid; place-items: center; opacity: .65; }
+.passwordField > button:hover { opacity: 1; }.passwordField > button:focus-visible { outline-offset: -5px; }
+.formError { min-height: 22px; margin-top: -2px; margin-bottom: 13px; display: flex; gap: 8px; align-items: flex-start; font-size: 12px; line-height: 1.5; color: #ffc6b8; }
+.formError > svg { flex: 0 0 auto; margin-top: 1px; }
+.submitButton { position: relative; width: 100%; height: 49px; background: #f0f4fa !important; border-radius: 4px; color: #16223a !important; font-size: 16px !important; font-weight: 400 !important; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 2px 18px #0001; transition: background .2s, box-shadow .2s; }
+.submitButton:hover { background: #fff !important; box-shadow: 0 0 25px #d6e5ff1c; }.submitButton > svg:last-child:not(.spinner) { position: absolute; right: 18px; }
+.switchForm { display: flex; align-items: center; justify-content: center; gap: 8px; color: #d1def395; font-size: 13px; margin-top: 26px; }
+.switchForm > button { font-size: 13px !important; padding: 5px 1px; color: #e8effe !important; border-bottom: 1px solid #d9e7ff4d; }
+.switchForm > button:hover { border-color: #e7f0ff; }
+.registration { top: 132px; }.registration h1 { font-size: 32px; }.registration .authForm { margin-top: 20px; }.registration .field { margin-bottom: 14px; height: 48px; }.registration .field input { height: 48px; font-size: 15px; }.registration .passwordField > button { height: 46px; }
+.avatarPicker { margin: 18px 0 12px; padding: 0; border: 0; }.avatarPicker legend { font-size: 12px; color: #d9e5f5ae; padding: 0; margin-bottom: 12px; }
+.avatarPicker > div { display: flex; gap: 17px; }.avatarPicker button { width: 41px; height: 41px; position: relative; border-radius: 50%; padding: 0; }.avatarPicker button::after { content: ""; position: absolute; inset: -4px; border: 1px solid transparent; border-radius: 50%; transition: border-color .2s; }.avatarPicker button.selectedAvatar::after { border-color: #f5f8ff; }.avatarPicker button:hover::after { border-color: #e6efff8c; }.avatarPicker button:focus-visible { outline-offset: 5px; }
+.registration .formError { min-height: 19px; margin: 13px 0 9px; font-size: 11px; }.registration .submitButton { height: 46px; }.registration .switchForm { margin-top: 15px; font-size: 12px; }.registration .switchForm > button { font-size: 12px !important; }
+.spinner { animation: spin 1s linear infinite; }.homeError { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); max-width: 950px; color: #f5f7fb; display: flex; align-items: center; gap: 12px; background: #102139f5; padding: 15px 18px; border: 1px solid #e6eeff45; border-radius: 5px; font-family: Arial, sans-serif; font-size: 13px; z-index: 40; }.homeError button { border: none; background: none; color: #f5f7fb; display: flex; cursor: pointer; }
+@keyframes checking { 0%, 80%, 100% { opacity: .15; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@keyframes familyReveal { 0%, 17% { opacity: 1; transform: scale(1); filter: blur(0); } 24%, 42% { opacity: 0; transform: scale(1); filter: blur(0); } 48%, 63% { opacity: 1; transform: scale(1); filter: blur(0); } 69%, 100% { opacity: 0; transform: scale(1.01); filter: blur(1px); } }
+@keyframes contentIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .console button, .console input, .profileImage, .addProfileCircle { transition: none; }.authMain, .userSelection { animation: fadeIn .35s ease both; }.bootFamilyMark { animation: fadeIn 1s ease both; } }
