@@ -205,7 +205,7 @@ export function createAuthStore(databasePath = path.join(process.cwd(), ".data",
 const authGlobal = globalThis as typeof globalThis & { afterhoursAuthStore?: AuthStore };
 
 export function getAuthStore(): AuthStore {
-  authGlobal.afterhoursAuthStore ??= createAuthStore();
+  authGlobal.afterhoursAuthStore ??= createAuthStore(process.env.OCS_AUTH_DATABASE);
   return authGlobal.afterhoursAuthStore;
 }
 

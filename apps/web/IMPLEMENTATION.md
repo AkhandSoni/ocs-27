@@ -1,23 +1,32 @@
 # Implementation
 
-## Current experience
-
-The page is a single viewport containing a 3D room and a focused black television. The TV displays the startup sequence, profile picker, sign-in/account creation screens, and game home interface. There is no surrounding site navigation, marketing copy, footer, or scrollable landing page.
-
-A first signed-out visit runs a 17.4-second code-rendered startup after the room is ready, then enters the picker. Later signed-out visits enter the picker directly. Signing in or creating an account opens home; a valid existing session goes directly home on page load. Browser storage retains the startup flag and up to five profile hints. It is not the account authority.
+The console is a stateful single-screen application. Domain exploration, application writing, collection, arcade, and profile library replace the console content surface while preserving system chrome and contextual controls. No external form redirect is used.
 
 ## Source map
 
 | File | Responsibility |
 | --- | --- |
-| `src/components/Lounge.tsx` | Room lifecycle and the React portal into the TV surface |
-| `src/components/ConsoleExperience.tsx` | Canvas/CSS startup, profile picker, authentication forms, session restore |
-| `src/components/GameScreen.tsx` | Games/Media home, search, library, details, launch screen, account menus |
-| `src/lib/create-room.ts` | WebGPU/WebGL renderer, shared camera, CSS3D TV, model loading, cleanup |
-| `src/lib/room-objects.ts` | Procedural room, walnut furniture, plants, lights, photographic gallery |
-| `src/lib/auth.ts` | SQLite users/sessions, validation, password hashing, origin and cookie handling |
-| `src/app/api/auth/*/route.ts` | Local account HTTP endpoints |
-| `scripts/optimize-models.mjs` | Model optimization and verification through Meshopt encoding/decoding |
+| `src/components/Lounge.tsx` | Original room lifecycle, React TV portal, focus/room camera, direct mobile mode |
+| `src/components/console/ConsoleShell.tsx` | Console routes, selection, session restore, directional input dispatch |
+| `BootScreen.tsx` | Original ACM startup; 3.2 seconds, skippable, session remembered |
+| `ConsoleHome.tsx`, `Glyph.tsx`, `ExperiencePreview.tsx`, `BrandMark.tsx` | Cartridge rail, consistent SVG symbols, selected-software contents and actual chapter branding |
+| `DomainExperience.tsx`, `content.ts` | Overview / responsibilities / selections; editable content separate from presentation |
+| `ApplicationExperience.tsx`, `src/lib/recruitment.ts` | Six-step native HTML application, validation, review, consent, receipt |
+| `AuthPanel.tsx`, `SystemPanel.tsx` | Account forms, system drawer, focus trap, reset, logout, help |
+| `StudentExperience.tsx`, `useLibrary.ts` | Account-isolated local applications and high scores; storage failures and migration |
+| `ShowcaseExperience.tsx` | Directional chapter library with public source links |
+| `ArcadeExperience.tsx`, `src/lib/snake.ts` | Playable Snake; pause, collision, scoring, high scores, touch controls |
+| `src/components/ControllerControls.tsx`, `src/lib/controller-input.ts` | Keyboard, physical/onscreen controls, held feedback, standard gamepad polling |
+| `src/lib/create-room.ts`, `src/lib/room-objects.ts` | Retained GPU/CSS3D scene, model loading and disposal, retained hardware and furniture |
+| `src/lib/auth.ts`, `src/app/api/auth/*` | Existing SQLite account security and API |
+
+Component filenames without a directory above are in `src/components/console/`.
+
+## Application storage and boundaries
+
+The library uses `ocs:console:v2:<account-id>` or `ocs:console:v2:guest` in localStorage. Submitted answers are immutable in the UI and explicitly marked local. Guest drafts migrate into an account on successful sign-in without overwriting existing account applications. The migration removes the guest copy after a successful write. Previous prototype application records are readable from `acm:ocs:prototype:v1:<account-id>`; old simulated interview/result states are not imported.
+
+Storage is schema-checked. Quota/disabled-storage errors keep a visible warning; submission failure never produces a success receipt. Reset is confirmed in the system drawer. This isolation improves prototype usability, but localStorage is accessible to other users of the same browser/device. There is no recruitment submission endpoint, server-side application authority, cross-device synchronization, selection result generator, or real scheduler.
 
 ## Local authentication
 
@@ -35,18 +44,12 @@ These are local console accounts. There is no Sony/PlayStation Network authentic
 
 Names are 2–24 characters, email addresses are normalized, passwords are 8–128 characters at registration, and avatars are `astro`, `horizon`, `cosmic`, `sunset`, `forest`, or `violet`. Mutation requests must have a matching Origin. JSON request bodies are limited to 4 KiB. Error responses use `{ error, code }` and all auth responses disable caching.
 
-## Graphics and media
+## Graphics, motion and accessibility
 
-WebGPURenderer selects WebGPU or falls back to WebGL 2. `?renderer=webgl` forces the fallback; inspect `.room-stage[data-renderer]` to identify the active backend. The default camera stays focused on the TV and adapts to viewport aspect ratio. The HTML interface is a CSS3DObject using that same camera, so its controls remain native DOM controls.
+The original room uses `WebGPURenderer` and a CSS3DObject driven by one camera. WebGL 2 fallback is retained. The interface uses SVG/HTML rather than a second graphics renderer. It shares one slate palette, consistent Lucide icon strokes, the real chapter lockup, and verified collection artwork.
 
-Both optimized device models require `EXT_meshopt_compression` and `KHR_mesh_quantization`. Meshopt WASM decodes their geometry. The optimization script reads the retained canonical inputs `assets/ps5.glb` and `assets/playstation_5_dualsense (1).glb`, then writes only optimized runtime models into `public/models/`. It welds, deduplicates, prunes, and compresses geometry, then decodes the results and checks triangle counts, embedded image hashes, and unchanged input files. Duplicate raw models, source archives, unused font files, and the obsolete screenshot are removed; credits remain alongside the runtime assets.
+The room caps rendering at 30 fps and DPR 1.75. Hidden/offscreen rendering is suspended. Reduced motion reduces transitions, shortens boot, and makes the room render on demand. Phone layouts avoid rendering the room. These are implementation budgets, not a measured claim about every laptop.
 
-The room uses local photographic prints from `public/art/`, a Poly Haven CC0 wood texture, and supplied PS5/DualSense models. ASTRO BOT's local hero and cover images come from its [official PlayStation page](https://www.playstation.com/en-us/games/astro-bot/). Other game artwork sources are recorded in `public/games/CREDITS.md`; photographs, models, and wood credits are recorded in `public/art/CREDITS.txt`, `public/models/ATTRIBUTION.txt`, and `public/textures/walnut-source.txt`.
+All interactive text, buttons and forms are DOM elements. Buttons have accessible names, focus is visible, form steps focus their headings, the system drawer traps Tab, and back behavior is contextual. Input fields keep native arrows, Backspace, Home and Enter behavior; Escape remains console back. The game supports pointer/touch swipes and explicit direction buttons. No sound is used.
 
-## References and checks
-
-- Startup motion reference: [PS5 Startup Screen](https://www.youtube.com/watch?v=k_6M31kHTzk). The implementation uses 17.4 seconds of canvas/CSS animation, not an embedded recording.
-- Interface reference: [Sony's PS5 user experience overview](https://blog.playstation.com/2020/10/15/first-look-playstation-5s-next-generation-user-experience/).
-- Account-screen reference: [Sony's account creation guide](https://www.playstation.com/en-us/support/account/create-account/). This is a visual/workflow reference; this app's accounts remain local.
-
-From the repository root, use `pnpm typecheck`, `pnpm test`, and `pnpm build:web`. Auth tests run against temporary isolated databases and cover persistence, registration races, incorrect passwords, expiry, origin checks, body limits, cookies, and the actual route handlers. Model verification runs with `pnpm --filter @ocs/web optimize:models`. See the [README](README.md) for installation and server commands.
+Retained model and texture licenses are in `public/models/ATTRIBUTION.txt` and `public/textures/walnut-source.txt`. Domain symbols are consistent SVGs; the redundant room poster gallery is removed. Project and event marks come from verified chapter repositories. See [inspection and verification notes](../../docs/console-rebuild.md).

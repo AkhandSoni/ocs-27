@@ -1,0 +1,1815 @@
+.ocs-console {
+  position: relative;
+  isolation: isolate;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  color: #edf1f4;
+  background: #111a22;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  outline: none;
+  pointer-events: auto;
+  --selection: #72aef1;
+}
+.ocs-console * {
+  box-sizing: border-box;
+}
+.ocs-console button,
+.ocs-console input,
+.ocs-console textarea,
+.ocs-console select {
+  font: inherit;
+}
+.ocs-console button {
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.ocs-console button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+.ocs-console button:focus-visible,
+.ocs-console a:focus-visible,
+.ocs-console [tabindex="0"]:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 5px;
+}
+.ocs-console input,
+.ocs-console select,
+.ocs-console textarea {
+  color: #f3f4f5;
+  background: #ffffff09;
+  border: 1px solid #ffffff48;
+  border-radius: 3px;
+  padding: 13px 15px;
+  outline: none;
+  font-size: 17px;
+}
+.ocs-console input:focus,
+.ocs-console select:focus,
+.ocs-console textarea:focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #ffffff12;
+}
+.ocs-console select option {
+  color: white;
+  background: #182735;
+}
+.ocs-console ::selection {
+  background: #ffffff45;
+}
+.ocs-console ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.ocs-console ::-webkit-scrollbar-thumb {
+  background: #ffffff45;
+  border-radius: 4px;
+}
+.console-surface {
+  height: 100%;
+}
+.console-chrome {
+  position: relative;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  padding: 0 62px;
+}
+.console-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0;
+}
+.console-wordmark > .acm-brand {
+  width: 122px;
+  height: 44px;
+  object-fit: contain;
+}
+.console-wordmark > span {
+  font-size: 14px;
+  letter-spacing: 2.4px;
+  white-space: nowrap;
+}
+.wordmark-divider {
+  color: #8c9ba8;
+  margin: 0 5px;
+}
+.console-chrome nav {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  margin-left: 12px;
+}
+.console-chrome nav button {
+  padding: 10px 0;
+  color: #9ba6b2;
+  font-size: 24px;
+  letter-spacing: -0.4px;
+  font-weight: 400;
+}
+.console-chrome nav button.active {
+  color: #fff;
+}
+.console-chrome nav button:hover {
+  color: #fff;
+}
+.system-tray {
+  margin-left: auto;
+  display: flex;
+  gap: 26px;
+  align-items: center;
+}
+.system-tray > button {
+  padding: 4px;
+  display: grid;
+  place-items: center;
+}
+.system-tray .player-orb {
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  background: #ffffff18;
+  border: 1px solid #ffffff30;
+  font-size: 16px;
+}
+.system-tray time {
+  font-size: 21px;
+  letter-spacing: -0.5px;
+  min-width: 60px;
+}
+.app-location {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #a9b6c2;
+}
+.console-viewport {
+  height: 570px;
+  position: relative;
+  animation: console-enter 0.32s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+.console-home {
+  height: 100%;
+  position: relative;
+}
+.experience-rail {
+  position: absolute;
+  top: 15px;
+  left: 62px;
+  right: 35px;
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+  height: 158px;
+  overflow: visible;
+  padding: 9px 6px;
+}
+.cartridge {
+  position: relative;
+  flex: 0 0 88px;
+  height: 96px;
+  border: 1px solid #ffffff30 !important;
+  border-radius: 13px;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #202b35 !important;
+  transition:
+    height 0.24s,
+    width 0.24s,
+    flex-basis 0.24s,
+    background 0.24s;
+}
+.cartridge > svg:not(.cartridge-check) {
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  left: calc(50% - 27px);
+  top: 13px;
+  color: #d5dfe6;
+  transition:
+    width 0.25s,
+    height 0.25s,
+    left 0.25s,
+    top 0.25s;
+}
+.cartridge.selected {
+  flex-basis: 143px;
+  height: 143px;
+  outline: 2px solid #f1f5f9;
+  outline-offset: 5px;
+  background: #304150 !important;
+}
+.cartridge.selected > svg:not(.cartridge-check) {
+  width: 89px;
+  height: 89px;
+  left: 27px;
+  top: 13px;
+}
+.cartridge-index {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #d2dce690;
+}
+.cartridge-name {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 8px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+.cartridge.selected .cartridge-name {
+  font-size: 11px;
+  bottom: 12px;
+}
+.cartridge-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #cae1ca;
+}
+.selection-caption {
+  position: absolute;
+  left: 75px;
+  top: 183px;
+  right: 75px;
+  display: flex;
+  justify-content: space-between;
+  color: #b7c4d1;
+  font-size: 10px;
+  letter-spacing: 2.3px;
+}
+.selection-caption > span:last-child {
+  opacity: 0.6;
+}
+.experience-title {
+  position: absolute;
+  left: 78px;
+  top: 239px;
+  width: 640px;
+  animation: console-enter 0.4s ease both;
+}
+.system-kicker {
+  color: #bcc7d0;
+  font-size: 10px;
+  letter-spacing: 2px;
+  line-height: 1.5;
+}
+.experience-title > .system-kicker {
+  font-size: 9px;
+  letter-spacing: 2.1px;
+  color: #a0b6c9;
+}
+.experience-title h1 {
+  font-size: 95px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  line-height: 1;
+  margin: 13px 0 11px;
+}
+.experience-management .experience-title h1 {
+  font-size: 65px;
+  letter-spacing: 1.2px;
+  margin-top: 26px;
+  margin-bottom: 20px;
+}
+.experience-research .experience-title h1 {
+  font-size: 76px;
+}
+.experience-title.long-title {
+  top: 224px;
+}
+.experience-title.long-title h1 {
+  font-size: 53px;
+  line-height: 1.1;
+  letter-spacing: 2px;
+}
+.experience-showcase .experience-title h1,
+.experience-applications .experience-title h1 {
+  font-size: 53px;
+  letter-spacing: 1px;
+  margin-top: 25px;
+}
+.experience-arcade .experience-title h1 {
+  font-size: 59px;
+  letter-spacing: 1px;
+}
+.experience-title h2 {
+  margin: 0 0 13px;
+  font-size: 19px;
+  font-weight: 400;
+  color: #d9e0e7;
+}
+.experience-description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #aab8c5;
+  max-width: 490px;
+  margin: 0 0 22px;
+}
+.ocs-console .launch-button {
+  min-height: 48px;
+  min-width: 210px;
+  border-radius: 28px;
+  background: #f0f4fa20;
+  border: 1px solid #ffffff20;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  color: #f9fbff;
+  font-size: 17px;
+  padding: 10px 27px;
+  transition:
+    background 0.16s,
+    box-shadow 0.16s;
+}
+.ocs-console .launch-button:hover {
+  background: #ffffff32;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 6px #ffffff18;
+}
+.launch-button > svg {
+  flex-shrink: 0;
+}
+/* The selected software identifier uses the same mark and scale system as its cartridge. */
+.experience-preview {
+  position: absolute;
+  left: 850px;
+  top: 235px;
+  width: 280px;
+  animation: console-enter 0.24s ease both;
+}
+.software-mark {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  color: #e2e9ee;
+}
+.software-mark > svg {
+  width: 112px;
+  height: 112px;
+}
+.software-index {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid #ffffff28;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #bdcbd5;
+}
+.experience-preview ul {
+  list-style: none;
+  padding: 13px 0 0;
+  margin: 0;
+}
+.experience-preview li {
+  font-size: 15px;
+  color: #d3dce3;
+  line-height: 2;
+}
+.experience-preview small {
+  display: block;
+  margin-top: 17px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #899eae;
+  max-width: 230px;
+}
+.collection-case > img {
+  object-fit: contain;
+}
+
+.console-statusbar {
+  position: absolute;
+  bottom: 0;
+  left: 62px;
+  right: 62px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #b3c1ce;
+  font-size: 10px;
+}
+.console-statusbar > div {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+}
+.console-statusbar > div > span,
+.console-statusbar button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+.console-statusbar > span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #91a2b2;
+}
+.console-statusbar i {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.key-symbol {
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid #ffffff50;
+  border-radius: 50%;
+  font-size: 16px;
+}
+.native-app {
+  position: relative;
+  height: 100%;
+  padding: 18px 78px 30px;
+  animation: console-enter 0.32s ease both;
+}
+.app-heading {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.app-heading > svg {
+  width: 58px;
+  height: 58px;
+  color: var(--selection);
+}
+.app-heading p {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #a9b7c3;
+  margin: 0 0 8px;
+}
+.native-app h1 {
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -0.8px;
+  margin: 0;
+  line-height: 1.2;
+}
+.native-app h2 {
+  font-size: 29px;
+  font-weight: 300;
+  letter-spacing: -0.4px;
+  margin: 0 0 14px;
+}
+.native-app h3 {
+  font-weight: 400;
+  font-size: 17px;
+  margin: 20px 0 9px;
+}
+.native-app p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #b5c2ce;
+}
+.app-tabs {
+  display: flex;
+  gap: 35px;
+  margin: 22px 0 24px;
+}
+.app-tabs button {
+  color: #91a1b0;
+  padding: 6px 0;
+  font-size: 16px;
+}
+.app-tabs button[aria-current] {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+}
+.domain-content {
+  width: 670px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 20px;
+  animation: console-enter 0.22s ease;
+}
+.domain-content > p {
+  max-width: 620px;
+}
+.interest-line {
+  display: flex;
+  gap: 22px;
+  color: #d1dbe4;
+  font-size: 11px;
+  margin-top: 24px;
+}
+.interest-line span + span {
+  border-left: 1px solid #ffffff30;
+  padding-left: 22px;
+}
+.console-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.console-list li {
+  position: relative;
+  padding: 7px 0 7px 17px;
+  color: #b5c2ce;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.console-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: #748a9e;
+}
+.round-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin: 20px 0;
+}
+.round-line > b {
+  font-size: 34px;
+  font-weight: 300;
+  color: #6d8192;
+  line-height: 1.1;
+}
+.round-line h3 {
+  margin: 0 0 5px;
+}
+.round-line p {
+  margin: 0;
+  font-size: 13px;
+  max-width: 480px;
+}
+.domain-apply {
+  position: absolute;
+  left: 78px;
+  bottom: 16px;
+}
+.ocs-console .quiet-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  padding: 9px 0;
+  color: #dce5ed;
+  text-decoration: none;
+}
+.quiet-button:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+.system-note,
+.native-app .system-note {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #879bac;
+  max-width: 750px;
+}
+.application-app {
+  padding-top: 6px;
+}
+.application-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #afbecb;
+}
+.application-heading b {
+  color: #657a8d;
+  margin: 0 10px;
+}
+.step-track {
+  display: flex;
+  gap: 6px;
+  margin: 15px 0 23px;
+}
+.step-track > i {
+  width: 45px;
+  height: 2px;
+  background: #ffffff20;
+}
+.step-track > i[data-active="true"] {
+  background: #d5e0e9;
+}
+.native-form {
+  height: calc(100% - 61px);
+  display: flex;
+  flex-direction: column;
+}
+.form-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0 18px 18px 0;
+  max-width: 970px;
+}
+.form-body h1 {
+  font-size: 32px;
+  max-width: 900px;
+  margin: 8px 0 22px;
+  outline: none;
+}
+.form-body > .system-kicker {
+  margin: 0;
+  font-size: 9px;
+}
+.identity-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px;
+  max-width: 900px;
+}
+.console-field {
+  display: block;
+}
+.console-field > span {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #c7d3de;
+}
+.console-field > span > small {
+  font-size: 10px;
+  color: #7f94a6;
+}
+.console-field input,
+.console-field select,
+.console-field textarea {
+  width: 100%;
+}
+.console-field textarea {
+  resize: vertical;
+  line-height: 1.7;
+  min-height: 210px;
+}
+.console-field ::placeholder {
+  color: #788e9f;
+}
+.long-answer {
+  max-width: 900px;
+}
+.long-answer textarea {
+  background: #ffffff05;
+}
+.application-review {
+  max-width: 850px;
+}
+.application-review > div {
+  margin-bottom: 20px;
+}
+.application-review h3 {
+  font-size: 15px;
+  margin-bottom: 7px;
+}
+.application-review p {
+  margin: 0;
+  color: #a7b7c6;
+  font-size: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.application-review .quiet-button {
+  font-size: 11px;
+  color: #9cbad3;
+}
+.console-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  padding-top: 15px;
+}
+.console-consent input {
+  accent-color: #bdcddc;
+}
+.form-feedback {
+  font-size: 10px;
+  color: #99aabd;
+  padding: 12px 0;
+  min-height: 37px;
+}
+.form-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff18;
+}
+.form-controls .launch-button {
+  min-height: 43px;
+  font-size: 15px;
+}
+.application-receipt {
+  padding-top: 20px;
+}
+.receipt-check {
+  position: absolute;
+  right: 90px;
+  top: 20px;
+  color: #bbcfbc;
+}
+.receipt-status {
+  margin: 10px 0 !important;
+  font-size: 13px !important;
+}
+.receipt-answers {
+  height: 260px;
+  overflow-y: auto;
+  margin: 20px 0;
+  padding-right: 24px;
+  max-width: 850px;
+}
+.receipt-answers p {
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.receipt-answers h3 {
+  font-size: 14px;
+}
+.receipt-check + .system-kicker {
+  margin: 0 0 10px;
+}
+.collection-app > h1 {
+  margin: 10px 0 30px;
+}
+.collection-stage {
+  display: flex;
+  gap: 55px;
+}
+.collection-cases {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 500px;
+  flex-shrink: 0;
+  padding: 22px 5px;
+}
+.collection-case {
+  width: 65px;
+  height: 240px;
+  background: #23313f !important;
+  border: 1px solid #ffffff25 !important;
+  border-radius: 3px;
+  position: relative;
+  transition:
+    width 0.25s,
+    transform 0.25s;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.collection-case > svg,
+.collection-case > img {
+  width: 44px;
+  height: 48px;
+  position: absolute;
+  left: 10px;
+  top: 30px;
+  color: #c4d3df;
+  object-fit: contain;
+}
+.collection-case strong {
+  writing-mode: vertical-rl;
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+.collection-case small {
+  display: none;
+}
+.collection-case.selected {
+  width: 170px;
+  transform: translateY(-12px);
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+  background: #385063 !important;
+}
+.collection-case.selected > svg,
+.collection-case.selected > img {
+  width: 100px;
+  height: 105px;
+  left: 35px;
+  top: 35px;
+}
+.collection-case.selected strong {
+  writing-mode: initial;
+  left: 16px;
+  right: 16px;
+  bottom: 27px;
+  font-size: 20px;
+}
+.collection-case.selected small {
+  display: block;
+  position: absolute;
+  left: 17px;
+  bottom: 10px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #b3c3cf;
+}
+.collection-detail {
+  max-width: 510px;
+  animation: console-enter 0.25s ease;
+}
+.collection-detail h2 {
+  font-size: 36px;
+  margin: 13px 0;
+}
+.collection-detail h3 {
+  font-size: 17px;
+  color: #cad4de;
+}
+.collection-detail p {
+  font-size: 14px;
+}
+.collection-detail > small {
+  display: block;
+  font-size: 9px;
+  color: #7b91a3;
+  line-height: 1.7;
+  max-width: 390px;
+  margin-top: 20px;
+}
+.application-slots {
+  max-width: 900px;
+  margin: 22px 0;
+}
+.application-slots > button {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  padding: 13px 14px;
+  border-top: 1px solid #ffffff20;
+}
+.application-slots > button:last-child {
+  border-bottom: 1px solid #ffffff20;
+}
+.application-slots > button:hover {
+  background: #ffffff09;
+}
+.application-slots > button > svg:first-child {
+  width: 32px;
+  height: 32px;
+  color: #b0c4d5;
+}
+.application-slots > button > svg:last-child {
+  margin-left: auto;
+}
+.application-slots span {
+  flex: 1;
+  text-align: left;
+}
+.application-slots strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+}
+.application-slots small {
+  display: block;
+  font-size: 11px;
+  color: #8fa6b9;
+  margin-top: 5px;
+}
+.arcade-app {
+  padding-top: 6px;
+}
+.arcade-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.arcade-heading .system-kicker {
+  font-size: 9px;
+  margin: 0 0 7px;
+}
+.arcade-heading h1 {
+  font-size: 38px;
+  letter-spacing: 1px;
+}
+.arcade-heading h1 > span {
+  color: #8f9f6e;
+  margin: 0 8px;
+}
+.arcade-score {
+  display: flex;
+  gap: 35px;
+}
+.arcade-score span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #8f9e86;
+}
+.arcade-score b {
+  display: block;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 300;
+  color: #dce6c4;
+  letter-spacing: 2px;
+}
+.arcade-layout {
+  display: flex;
+  gap: 45px;
+}
+.game-board {
+  position: relative;
+  width: 650px;
+  max-height: 420px;
+  background: #0a1514;
+  border: 1px solid #91a66a50;
+  outline: none;
+  touch-action: none;
+}
+.game-board > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0b1514e6;
+}
+.game-overlay > span {
+  color: #8b9c73;
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+.game-overlay h2 {
+  margin: 19px 0 26px;
+  color: #e4ecd5;
+  font-size: 30px;
+}
+.arcade-instructions {
+  flex: 1;
+}
+.arcade-instructions h3 {
+  margin: 4px 0 12px;
+  font-size: 19px;
+}
+.arcade-instructions p {
+  font-size: 13px;
+  color: #9eaf9c;
+}
+.arcade-instructions dl {
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 24px;
+}
+.arcade-instructions dt {
+  color: #d6e0c9;
+}
+.arcade-instructions dd {
+  color: #7f9481;
+  margin: 0 0 14px;
+}
+.touch-dpad {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.touch-dpad > button {
+  border: 1px solid #ffffff30;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+.arcade-app > .system-note {
+  margin: 12px 0 0;
+}
+.system-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: #04090f99;
+  animation: console-fade 0.2s ease;
+}
+.system-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 490px;
+  background: #0d1721f5;
+  box-shadow: -20px 0 80px #0005;
+  border-left: 1px solid #ffffff15;
+  padding: 45px 45px;
+  overflow-y: auto;
+  animation: system-slide 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.system-close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  padding: 4px;
+}
+.system-panel h2 {
+  font-size: 34px;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  margin: 14px 0 22px;
+}
+.system-panel p {
+  font-size: 13px;
+  color: #a3b3c2;
+  line-height: 1.75;
+}
+.system-panel > small,
+.auth-native > small {
+  display: block;
+  font-size: 10px;
+  color: #758b9e;
+  line-height: 1.8;
+  margin-top: 28px;
+}
+.player-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e7edf3 !important;
+  font-size: 17px !important;
+}
+.system-options {
+  margin-top: 25px;
+}
+.system-options button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 17px;
+  text-align: left;
+  padding: 18px 0;
+  border-bottom: 1px solid #ffffff16;
+  font-size: 15px;
+}
+.system-options button:hover {
+  color: white;
+  background: #ffffff06;
+}
+.control-manual {
+  margin: 25px 0;
+}
+.control-manual dt {
+  font-size: 14px;
+  color: #dbe3eb;
+}
+.control-manual dd {
+  font-size: 12px;
+  color: #8fa4b6;
+  line-height: 1.7;
+  margin: 5px 0 17px;
+}
+.system-panel h3 {
+  font-size: 16px;
+  font-weight: 400;
+}
+.reset-confirm {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #ffffff30;
+}
+.reset-confirm .launch-button {
+  margin-top: 10px;
+  font-size: 13px;
+  min-width: 0;
+}
+.auth-native > p {
+  margin-bottom: 22px;
+}
+.auth-native .console-field {
+  margin: 18px 0;
+}
+.auth-native input {
+  font-size: 16px;
+}
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 48px;
+}
+.password-field button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px;
+}
+.form-error {
+  color: #e4b4a4 !important;
+  font-size: 12px !important;
+  min-height: 18px;
+}
+.auth-native > .quiet-button {
+  margin-top: 20px;
+  font-size: 12px;
+}
+.profile-picker {
+  display: flex;
+  gap: 18px;
+  margin: 23px 0;
+  overflow-x: auto;
+}
+.profile-picker button {
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 75px;
+}
+.profile-picker button > span {
+  display: grid;
+  place-items: center;
+  background: #ffffff12;
+  border: 1px solid #ffffff40;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 22px;
+}
+.session-warning {
+  position: absolute;
+  bottom: 55px;
+  left: 65px;
+  z-index: 15;
+  background: #152534 !important;
+  color: #d8c7ac !important;
+  padding: 10px 15px;
+  font-size: 11px;
+}
+.boot-screen {
+  position: absolute;
+  inset: 0;
+  background: #060b13;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.boot-version {
+  position: absolute;
+  top: 48px;
+  left: 60px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #6e8396;
+}
+.boot-emblem {
+  text-align: center;
+  animation: boot-reveal 0.6s ease both;
+}
+.boot-emblem > .acm-brand {
+  width: 300px;
+  height: auto;
+  object-fit: contain;
+}
+.boot-emblem h1 {
+  font-size: 32px;
+  letter-spacing: 8px;
+  font-weight: 400;
+  margin: 14px 0;
+}
+.boot-emblem h1 > span {
+  color: #8099ac;
+  font-weight: 300;
+  margin-left: 12px;
+}
+.boot-emblem p {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #8ca3b7;
+}
+.boot-progress {
+  position: absolute;
+  bottom: 90px;
+  width: 140px;
+  height: 1px;
+  background: #253544;
+}
+.boot-progress > span {
+  display: block;
+  height: 100%;
+  background: #d3e4ee;
+  transform-origin: left;
+  animation: boot-load 3.2s linear both;
+}
+.boot-screen > button {
+  position: absolute;
+  bottom: 45px;
+  right: 60px;
+  font-size: 11px;
+  color: #8197aa;
+}
+.boot-screen kbd {
+  border: 1px solid #60728566;
+  font: 9px Arial;
+  padding: 4px 7px;
+  margin-left: 10px;
+  border-radius: 3px;
+}
+.console-wait {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #91a7ba;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+.spinning {
+  animation: console-spin 1s linear infinite;
+}
+@keyframes console-enter {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes console-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes system-slide {
+  from {
+    opacity: 0;
+    transform: translateX(45px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes boot-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  25%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes boot-load {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes console-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 680px) {
+  .ocs-console {
+    width: 100%;
+    height: 100svh;
+    min-height: 550px;
+  }
+  .console-chrome {
+    height: 88px;
+    padding: 0 22px;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 12px;
+  }
+  .console-wordmark > svg {
+    width: 24px;
+    height: 25px;
+  }
+  .console-wordmark > span {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+  .console-chrome nav {
+    order: 3;
+    margin: 0;
+    width: 100%;
+    gap: 25px;
+  }
+  .console-chrome nav button {
+    font-size: 15px;
+    padding: 0;
+  }
+  .system-tray {
+    gap: 17px;
+  }
+  .system-tray time {
+    display: none;
+  }
+  .system-tray svg {
+    width: 19px;
+    height: 19px;
+  }
+  .system-tray .player-orb {
+    width: 27px;
+    height: 27px;
+  }
+  .app-location {
+    font-size: 8px;
+    letter-spacing: 1px;
+    order: 3;
+  }
+  .console-viewport {
+    height: calc(100svh - 142px);
+    min-height: 408px;
+  }
+  .experience-rail {
+    left: 0;
+    right: 0;
+    top: 20px;
+    padding: 10px 26px;
+    overflow-x: auto;
+    height: 147px;
+    gap: 14px;
+  }
+  .cartridge {
+    flex-basis: 67px;
+    height: 76px;
+  }
+  .cartridge.selected {
+    flex-basis: 113px;
+    height: 113px;
+  }
+  .cartridge > svg:not(.cartridge-check) {
+    width: 42px;
+    height: 42px;
+    left: 12px;
+    top: 10px;
+  }
+  .cartridge.selected > svg:not(.cartridge-check) {
+    width: 70px;
+    height: 70px;
+    left: 20px;
+    top: 8px;
+  }
+  .cartridge-name {
+    font-size: 6px;
+    letter-spacing: 0.4px;
+  }
+  .cartridge.selected .cartridge-name {
+    font-size: 8px;
+    bottom: 11px;
+  }
+  .selection-caption {
+    top: 171px;
+    left: 28px;
+    right: 25px;
+    font-size: 7px;
+    letter-spacing: 1.4px;
+  }
+  .experience-title,
+  .experience-title.long-title {
+    left: 28px;
+    right: 25px;
+    top: 220px;
+    width: auto;
+  }
+  .experience-title > .system-kicker {
+    font-size: 7px;
+    letter-spacing: 1.4px;
+  }
+  .experience-title h1 {
+    font-size: 55px;
+    letter-spacing: 2px;
+    margin: 18px 0;
+  }
+  .experience-research .experience-title h1 {
+    font-size: 43px;
+  }
+  .experience-management .experience-title h1 {
+    font-size: 32px;
+    margin: 22px 0;
+  }
+  .experience-title.long-title h1 {
+    font-size: 33px;
+  }
+  .experience-showcase .experience-title h1,
+  .experience-applications .experience-title h1 {
+    font-size: 32px;
+  }
+  .experience-arcade .experience-title h1 {
+    font-size: 33px;
+  }
+  .experience-title h2 {
+    font-size: 15px;
+  }
+  .experience-description {
+    font-size: 13px;
+    line-height: 1.65;
+    max-width: 320px;
+  }
+  .ocs-console .launch-button {
+    min-height: 43px;
+    font-size: 14px;
+    min-width: 175px;
+    padding: 9px 20px;
+  }
+  .console-statusbar {
+    left: 22px;
+    right: 22px;
+    height: 50px;
+    bottom: 0;
+  }
+  .console-statusbar > div {
+    gap: 14px;
+  }
+  .console-statusbar > div > span,
+  .console-statusbar button {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .console-statusbar > span {
+    display: none;
+  }
+  .key-symbol {
+    width: 16px;
+    height: 16px;
+    font-size: 13px;
+  }
+  .native-app {
+    padding: 16px 26px 20px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .native-app h1 {
+    font-size: 30px;
+  }
+  .native-app h2 {
+    font-size: 24px;
+  }
+  .app-heading {
+    gap: 14px;
+  }
+  .app-heading > svg {
+    width: 40px;
+    height: 40px;
+  }
+  .app-heading p {
+    font-size: 7px;
+    letter-spacing: 1.2px;
+  }
+  .app-tabs {
+    gap: 25px;
+    margin: 22px 0;
+  }
+  .app-tabs button {
+    font-size: 14px;
+  }
+  .domain-content {
+    width: 100%;
+    max-height: none;
+    padding: 0 0 80px;
+  }
+  .domain-content p {
+    font-size: 14px;
+  }
+  .interest-line {
+    flex-wrap: wrap;
+    gap: 13px;
+    font-size: 10px;
+  }
+  .interest-line span + span {
+    padding-left: 12px;
+  }
+  .domain-apply {
+    position: sticky;
+    left: auto;
+    bottom: 0;
+    background: #273643 !important;
+  }
+  .native-app h3 {
+    font-size: 16px;
+  }
+  .console-list li {
+    font-size: 13px;
+  }
+  .round-line > b {
+    font-size: 28px;
+  }
+  .round-line p {
+    font-size: 12px;
+  }
+  .application-heading {
+    font-size: 8px;
+    letter-spacing: 1.2px;
+  }
+  .step-track {
+    margin: 14px 0 22px;
+  }
+  .step-track > i {
+    width: 32px;
+  }
+  .application-app {
+    overflow: hidden;
+  }
+  .native-form {
+    height: calc(100% - 55px);
+  }
+  .form-body {
+    padding-right: 6px;
+    max-width: none;
+  }
+  .form-body h1 {
+    font-size: 25px;
+    line-height: 1.3;
+    margin-bottom: 25px;
+  }
+  .identity-fields {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .console-field input,
+  .console-field textarea,
+  .console-field select {
+    font-size: 16px;
+    padding: 12px;
+  }
+  .console-field textarea {
+    min-height: 250px;
+  }
+  .console-field > span {
+    font-size: 11px;
+  }
+  .console-field > span > small {
+    font-size: 9px;
+  }
+  .form-controls .launch-button {
+    font-size: 12px;
+    min-width: 165px;
+  }
+  .form-controls .quiet-button {
+    font-size: 12px;
+  }
+  .form-feedback {
+    font-size: 9px;
+    line-height: 1.5;
+    padding: 10px 0;
+  }
+  .application-review p {
+    font-size: 12px;
+  }
+  .application-review h3 {
+    font-size: 13px;
+  }
+  .console-consent {
+    font-size: 12px;
+  }
+  .receipt-check {
+    right: 26px;
+    top: 14px;
+  }
+  .receipt-check svg {
+    width: 28px;
+  }
+  .application-receipt h1 {
+    font-size: 27px;
+  }
+  .receipt-answers {
+    height: 42%;
+    margin: 20px 0;
+  }
+  .application-receipt .system-note {
+    font-size: 10px;
+  }
+  .collection-app > h1 {
+    font-size: 27px;
+    margin: 12px 0 10px;
+  }
+  .collection-stage {
+    display: block;
+  }
+  .collection-cases {
+    width: 100%;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 15px 7px;
+    height: 200px;
+  }
+  .collection-case {
+    width: 42px;
+    height: 155px;
+  }
+  .collection-case.selected {
+    width: 114px;
+    transform: translateY(-5px);
+  }
+  .collection-case > svg,
+  .collection-case > img {
+    width: 30px;
+    height: 33px;
+    left: 5px;
+    top: 15px;
+  }
+  .collection-case strong {
+    font-size: 11px;
+    left: 15px;
+    bottom: 12px;
+  }
+  .collection-case.selected > svg,
+  .collection-case.selected > img {
+    width: 67px;
+    height: 70px;
+    left: 22px;
+    top: 16px;
+  }
+  .collection-case.selected strong {
+    font-size: 14px;
+    left: 12px;
+    bottom: 25px;
+  }
+  .collection-case.selected small {
+    font-size: 6px;
+    left: 12px;
+  }
+  .collection-detail {
+    margin-top: 18px;
+  }
+  .collection-detail h2 {
+    font-size: 28px;
+  }
+  .collection-detail h3 {
+    font-size: 15px;
+  }
+  .collection-detail p {
+    font-size: 13px;
+  }
+  .application-slots > button {
+    gap: 14px;
+    padding: 14px 0;
+  }
+  .application-slots strong {
+    font-size: 14px;
+  }
+  .application-slots small {
+    font-size: 10px;
+  }
+  .application-slots > button > svg:first-child {
+    width: 27px;
+    height: 30px;
+  }
+  .student-app .system-note {
+    font-size: 11px;
+  }
+  .arcade-app {
+    padding-top: 10px;
+  }
+  .arcade-heading {
+    display: block;
+    margin-bottom: 20px;
+  }
+  .arcade-heading h1 {
+    font-size: 27px;
+  }
+  .arcade-score {
+    gap: 28px;
+    margin-top: 15px;
+  }
+  .arcade-score b {
+    display: inline;
+    margin-left: 8px;
+    font-size: 22px;
+  }
+  .arcade-score span {
+    font-size: 8px;
+  }
+  .arcade-layout {
+    display: block;
+  }
+  .game-board {
+    width: 100%;
+    max-height: none;
+  }
+  .game-overlay h2 {
+    font-size: 22px;
+  }
+  .game-overlay > span {
+    font-size: 7px;
+    letter-spacing: 2px;
+  }
+  .game-overlay .launch-button {
+    min-width: 140px;
+  }
+  .arcade-instructions {
+    margin-top: 18px;
+  }
+  .arcade-instructions > p,
+  .arcade-instructions > dl,
+  .arcade-instructions > h3 {
+    display: none;
+  }
+  .arcade-instructions .quiet-button {
+    font-size: 12px;
+  }
+  .touch-dpad {
+    float: right;
+    margin-top: 0;
+  }
+  .touch-dpad > button {
+    padding: 7px 11px;
+  }
+  .arcade-app > .system-note {
+    font-size: 9px;
+    clear: both;
+    padding-top: 12px;
+  }
+  .system-panel {
+    width: 100%;
+    padding: 38px 28px;
+  }
+  .system-panel h2 {
+    font-size: 29px;
+  }
+  .system-panel p {
+    font-size: 13px;
+  }
+  .boot-version {
+    left: 28px;
+    top: 38px;
+    font-size: 7px;
+    letter-spacing: 2px;
+  }
+  .boot-emblem > .acm-brand {
+    width: 75px;
+    height: 85px;
+  }
+  .boot-emblem h1 {
+    font-size: 27px;
+  }
+  .boot-emblem p {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .boot-screen > button {
+    right: 28px;
+    font-size: 10px;
+  }
+  .session-warning {
+    left: 22px;
+    right: 22px;
+    font-size: 10px;
+    bottom: 55px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ocs-console * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .boot-progress > span {
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 680px) {
+  .experience-preview {
+    display: none;
+  }
+  .console-wordmark > .acm-brand {
+    width: 100px;
+    height: 36px;
+  }
+  .boot-emblem > .acm-brand {
+    width: 220px;
+    height: auto;
+  }
+}

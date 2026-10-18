@@ -5,3 +5,7 @@ out/
 .data/
 *.tsbuildinfo
 .env*.local
+
+# Browser verification artifacts
+apps/web/test-results/
+apps/web/playwright-report/

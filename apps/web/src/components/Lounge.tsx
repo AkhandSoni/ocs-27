@@ -1,62 +1,125 @@
 "use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import ConsoleExperience from "./ConsoleExperience";
-import GameScreen from "./GameScreen";
+import { Monitor } from "lucide-react";
+import ConsoleShell from "./console/ConsoleShell";
+import ControllerControls from "./ControllerControls";
 import type { RoomController } from "@/lib/create-room";
-
-type Player = { id: string; name: string; email: string; avatar: string };
-
 export default function Lounge() {
-  const stage = useRef<HTMLDivElement>(null);
-  const controller = useRef<RoomController | null>(null);
-  const [screenHost, setScreenHost] = useState<HTMLDivElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState("");
-  const [player, setPlayer] = useState<Player | null>(null);
-
+  const stage = useRef<HTMLDivElement>(null),
+    controller = useRef<RoomController | null>(null);
+  const [host, setHost] = useState<HTMLDivElement | null>(null),
+    [ready, setReady] = useState(false),
+    [error, setError] = useState(""),
+    [flat, setFlat] = useState(false),
+    [focused, setFocused] = useState(true);
   useEffect(() => {
-    let cancelled = false;
-    let created: RoomController | undefined;
-    const host = document.createElement("div");
-    host.className = "tv-screen-host";
-    setScreenHost(host);
-    void import("@/lib/create-room").then(async ({ createRoom }) => {
-      if (cancelled || !stage.current) return;
-      created = await createRoom(stage.current, host, {
-        onReady(mode) {
-          if (!cancelled) {
-            setReady(true);
-            stage.current?.setAttribute("data-renderer", mode);
-          }
-        },
-        onError(message) { if (!cancelled) setError(message); },
-        onAssetError(message) { console.warn(message); },
+    const media = matchMedia("(max-width:680px)");
+    const change = () => setFlat(media.matches);
+    change();
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
+  useEffect(() => {
+    if (flat) return;
+    let cancelled = false,
+      created: RoomController | undefined;
+    setReady(false);
+    setError("");
+    const screen = document.createElement("div");
+    screen.className = "tv-screen-host";
+    setHost(screen);
+    void import("@/lib/create-room")
+      .then(async ({ createRoom }) => {
+        if (cancelled || !stage.current) return;
+        created = await createRoom(stage.current, screen, {
+          onReady(mode) {
+            if (!cancelled) {
+              setReady(true);
+              stage.current?.setAttribute("data-renderer", mode);
+            }
+          },
+          onError(message) {
+            if (!cancelled) setError(message);
+          },
+          onAssetError(message) {
+            console.warn(message);
+          },
+        });
+        if (cancelled) created.dispose();
+        else {
+          controller.current = created;
+          created.setFocus(true);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled)
+          setError(
+            e instanceof Error ? e.message : "Graphics could not start.",
+          );
       });
-      if (cancelled) created.dispose();
-      else { controller.current = created; created.setFocus(true); }
-    }).catch((cause: unknown) => {
-      if (!cancelled) setError(cause instanceof Error ? cause.message : "Graphics could not start.");
-    });
-    return () => { cancelled = true; created?.dispose(); controller.current = null; };
-  }, []);
-
-  const handleGameChange = useCallback((color: string) => { controller.current?.setAccent(color); }, []);
-  const handleHome = useCallback(() => {
-    controller.current?.setFocus(true);
-  }, []);
-  const handleUser = useCallback((user: Player | null) => { setPlayer(user); }, []);
-
+    return () => {
+      cancelled = true;
+      created?.dispose();
+      controller.current = null;
+    };
+  }, [flat]);
+  const accent = useCallback(
+    (color: string) => controller.current?.setAccent(color),
+    [],
+  );
+  const toggleRoom = useCallback(
+    () =>
+      setFocused((current) => {
+        controller.current?.setFocus(!current);
+        return !current;
+      }),
+    [],
+  );
+  useEffect(() => {
+    if (focused)
+      stage.current
+        ?.querySelector<HTMLElement>(".ocs-console")
+        ?.focus({ preventScroll: true });
+  }, [focused]);
   return (
-    <main className={`console-room ${ready ? "is-ready" : ""}`} aria-label="PlayStation gaming room">
+    <main
+      className={`console-room ${ready ? "is-ready" : ""} ${flat ? "flat-mode" : ""}`}
+      aria-label="ACM VIT gaming console environment"
+    >
       <div className="room-stage" ref={stage} />
-      {!ready && !error && <div className="room-loading" role="status" aria-label="Loading the gaming room"><span /></div>}
-      {error && <div className="graphics-error" role="alert"><p>{error}</p><button onClick={() => window.location.reload()}>Retry</button></div>}
-      {screenHost && createPortal(
-        <ConsoleExperience ready={ready} onHome={handleHome} onUserChange={handleUser}>
-          <GameScreen player={player} onGameChange={handleGameChange} />
-        </ConsoleExperience>, screenHost,
+      {!flat && !ready && !error && (
+        <div className="room-loading" role="status">
+          <span />
+          <p>Initializing console graphics</p>
+        </div>
+      )}
+      {!flat && error && (
+        <div className="graphics-error" role="alert">
+          <p>{error}</p>
+          <button onClick={() => location.reload()}>Retry graphics</button>
+          <button onClick={() => setFlat(true)}>
+            Open console without 3D room
+          </button>
+        </div>
+      )}
+      {!flat &&
+        host &&
+        createPortal(
+          <ConsoleShell ready={ready} onAccent={accent} onRoom={toggleRoom} />,
+          host,
+        )}
+      {flat && (
+        <div className="flat-console">
+          <ConsoleShell ready onAccent={accent} onRoom={() => setFlat(false)} />
+        </div>
+      )}
+      <ControllerControls />
+      {!flat && ready && (
+        <button className="room-view-toggle" onClick={toggleRoom}>
+          <Monitor size={15} />
+          {focused ? "Room view" : "Focus console"}
+        </button>
       )}
     </main>
   );
