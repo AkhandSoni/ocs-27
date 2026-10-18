@@ -123,6 +123,7 @@ export default function Lounge() {
               onRoom={toggleRoom}
               onPowerOff={powerOff}
               onStartupChange={setStartupInProgress}
+              startAtStartup={startupInProgress}
             />
           ) : (
             <StaticScreen onPower={() => setPowered(true)} />
@@ -138,6 +139,7 @@ export default function Lounge() {
               onRoom={() => setFlat(false)}
               onPowerOff={powerOff}
               onStartupChange={setStartupInProgress}
+              startAtStartup={startupInProgress}
             />
           ) : (
             <StaticScreen onPower={() => setPowered(true)} />

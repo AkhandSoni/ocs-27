@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Gamepad2, X } from "lucide-react";
 import {
   controllerAction,
@@ -115,7 +115,7 @@ export default function ControllerControls() {
     [pressed, setPressed] = useState<
       Partial<Record<ControllerAction, boolean>>
     >({});
-  useEffect(() => {
+  useLayoutEffect(() => {
     const held = new Set<ControllerAction>();
     function down(event: KeyboardEvent) {
       const action = controllerKeys[event.key];
@@ -175,7 +175,7 @@ export default function ControllerControls() {
       if (!pad) {
         previous.forEach((a) => controllerFeedback(a, false));
         previous.clear();
-        frame = 0;
+        frame = requestAnimationFrame(poll);
         return;
       }
       const active = new Set<ControllerAction>();
@@ -263,7 +263,7 @@ export default function ControllerControls() {
           >
             {controls.map((c) => (
               <button
-                key={c.action}
+                key={c.position}
                 className={`pad-${c.position}`}
                 data-pressed={!!pressed[c.action]}
                 aria-label={c.label}

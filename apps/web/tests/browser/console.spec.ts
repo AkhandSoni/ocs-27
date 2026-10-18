@@ -32,6 +32,8 @@ async function continueStartup(page: Page) {
   await page
     .getByRole("button", { name: /Continue as guest|Continue to console/ })
     .click();
+  await expect(page.locator(".startup-screen")).toHaveCount(0);
+  await expect(page.locator('[data-console-stage="boot"]')).toHaveCount(0);
 }
 async function choose(page: Page, name: string) {
   await page
@@ -307,6 +309,65 @@ test("keyboard, physical controller, contextual back and draft persistence work"
   await expect(
     page.getByLabel("VIT registration number", { exact: true }),
   ).toHaveValue("26BCE0001");
+});
+
+test("standard Gamepad API keeps polling and maps triggers, sticks, and select", async ({
+  page,
+}) => {
+  await enter(page);
+  await page.evaluate(() => {
+    const fakePad = {
+      axes: [0, 0, 0, 0],
+      buttons: Array.from({ length: 18 }, () => ({ pressed: false, value: 0 })),
+      connected: true,
+      id: "ACM test controller",
+      index: 0,
+      mapping: "standard",
+      timestamp: 0,
+    };
+    Object.defineProperty(navigator, "getGamepads", {
+      configurable: true,
+      value: () => [fakePad],
+    });
+    (window as unknown as { __fakePad: typeof fakePad }).__fakePad = fakePad;
+    window.dispatchEvent(new Event("gamepadconnected"));
+  });
+  await page.waitForTimeout(100);
+  await page.evaluate(() => {
+    type FakePad = {
+      axes: number[];
+      buttons: { pressed: boolean; value: number }[];
+    };
+    (window as unknown as { __fakePad: FakePad }).__fakePad.buttons[7] = {
+      pressed: true,
+      value: 1,
+    };
+  });
+  await expect(
+    page.getByRole("button", { name: "Select RESEARCH", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() => {
+    type FakePad = {
+      axes: number[];
+      buttons: { pressed: boolean; value: number }[];
+    };
+    const pad = (window as unknown as { __fakePad: FakePad }).__fakePad;
+    pad.buttons[7] = { pressed: false, value: 0 };
+    pad.axes[0] = 0.9;
+  });
+  await expect(
+    page.getByRole("button", { name: "Select MANAGEMENT", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() => {
+    type FakePad = {
+      axes: number[];
+      buttons: { pressed: boolean; value: number }[];
+    };
+    const pad = (window as unknown as { __fakePad: FakePad }).__fakePad;
+    pad.axes[0] = 0;
+    pad.buttons[0] = { pressed: true, value: 1 };
+  });
+  await expect(page.locator('[data-domain="management"]')).toBeVisible();
 });
 
 test("arcade is playable, pauses, scores, ends, and retains a high score", async ({

@@ -1,5 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ArrowLeft, CircleHelp, Home, Settings, UserRound } from "lucide-react";
 import { moveFocus, type ControllerAction } from "@/lib/controller-input";
 import type { DomainId } from "@/lib/recruitment";
@@ -30,18 +37,20 @@ export default function ConsoleShell({
   onRoom,
   onPowerOff,
   onStartupChange,
+  startAtStartup,
 }: {
   ready: boolean;
   onAccent: (color: string) => void;
   onRoom: () => void;
   onPowerOff: () => void;
   onStartupChange: (active: boolean) => void;
+  startAtStartup: boolean;
 }) {
   const [route, setRoute] = useState<Route>({ screen: "home" }),
     [selected, setSelected] = useState<ExperienceId>("tech");
   const [panel, setPanel] = useState<"auth" | "system" | "help" | null>(null),
-    [boot, setBoot] = useState(true),
-    [startup, setStartup] = useState(true),
+    [boot, setBoot] = useState(startAtStartup),
+    [startup, setStartup] = useState(startAtStartup),
     [sessionChecked, setSessionChecked] = useState(false),
     [student, setStudent] = useState<Student | null>(null),
     [time, setTime] = useState(""),
@@ -104,7 +113,7 @@ export default function ConsoleShell({
   useEffect(() => {
     onAccent(selectionColor);
   }, [selectionColor, onAccent]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!boot && !startup) root.current?.focus({ preventScroll: true });
   }, [route, boot, startup]);
   useEffect(() => {
@@ -136,7 +145,7 @@ export default function ConsoleShell({
     }
     home();
   }
-  useEffect(() => {
+  useLayoutEffect(() => {
     function control(e: Event) {
       const action = (e as CustomEvent<ControllerAction>).detail;
       if (boot || startup) return;
