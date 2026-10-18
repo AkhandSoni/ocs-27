@@ -1,0 +1,31 @@
+{
+  "name": "@ocs/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0 --port 3000",
+    "test": "node --experimental-strip-types --test tests/auth.test.mjs tests/auth-routes.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "optimize:models": "node scripts/optimize-models.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.180.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.0",
+    "@gltf-transform/core": "^4.2.0",
+    "@gltf-transform/extensions": "^4.2.0",
+    "@gltf-transform/functions": "^4.2.0",
+    "meshoptimizer": "^0.24.0"
+  }
+}
