@@ -1,0 +1,11 @@
+Wood Table 001 — Poly Haven
+Asset: https://polyhaven.com/a/wood_table_001
+Authors: Dimitrios Savva (Photography), Rico Cilliers (Processing)
+License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+Poly Haven asset license: https://polyhaven.com/license
+Downloaded: 2026-10-18
+Original file: wood_table_001_diff_2k.jpg
+Download: https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_001/wood_table_001_diff_2k.jpg
+Resolution: 2048 x 2048
+MD5: a36483628b915dabf82961ab2a62a85c
+Local name: walnut.jpg (unaltered original JPEG; descriptive project filename)
