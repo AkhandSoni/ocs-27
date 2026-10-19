@@ -97,3 +97,26 @@ test('disc leaves its holder continuously and enters the drive edge first', () =
   motion.update(sampleLoad(CUES.insertEnd - .1), holder, drive);
   assert.equal(disc.visible, true, 'the same disc reappears during ejection');
 });
+
+test('the complete extracted disc stays in the loading shot while clearing the case', () => {
+  for (const [width, height] of [[1440, 900], [978, 720], [390, 844], [768, 1024]]) {
+    const aspect = width / height, fov = width < 680 ? 48 : 38;
+    const camera = new THREE.PerspectiveCamera(fov, aspect, .1, 80);
+    camera.position.set(0, 3.66, roomCameraZ(aspect, fov, true));
+    camera.lookAt(0, 3.65, -.3); camera.updateMatrixWorld();
+    const layout = makeCaseLayout(camera.position.z, aspect, fov);
+    const holder = new THREE.Group(), disc = new THREE.Group(), drive = new THREE.Group();
+    drive.position.set(-3.65, 2.1, .43); drive.updateMatrixWorld();
+    const caseMotion = new CaseMotion(holder, 0), discMotion = new DiscMotion(disc);
+    for (let t = CUES.liftStart; t <= CUES.flyEnd; t += 1 / 60) {
+      const pose = sampleLoad(t);
+      caseMotion.update(1, pose, 0, layout); holder.updateMatrixWorld();
+      discMotion.update(pose, holder, drive); disc.updateMatrixWorld();
+      for (let i = 0; i < 24; i++) {
+        const angle = i / 24 * Math.PI * 2;
+        const point = new THREE.Vector3(Math.cos(angle) * DISC_RADIUS, Math.sin(angle) * DISC_RADIUS, 0).applyMatrix4(disc.matrixWorld).project(camera);
+        assert.ok(Math.abs(point.x) < .97 && Math.abs(point.y) < .97, `${width}x${height}: disc stays visible at ${t.toFixed(2)}s`);
+      }
+    }
+  }
+});

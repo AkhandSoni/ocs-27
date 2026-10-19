@@ -12,14 +12,14 @@ export const CUES = {
   presentation: 1.8,
   focusEnd: .85,
   openStart: .65, openEnd: 1.65,
-  liftStart: 1.85, liftEnd: 3.05,
-  flyStart: 3.05, flyEnd: 5.65,
-  slotStart: 4.5, slotEnd: 5.25,
-  insertStart: 5.9, insertEnd: 7.15,
-  closeStart: 7.3, closeEnd: 7.85,
-  caseCloseStart: 7.9, caseCloseEnd: 8.65,
-  caseReturnStart: 8.65, caseReturnEnd: 9.8,
-  bootStart: 7.95, zoomEnd: 10.7, end: 11.7,
+  liftStart: 1.85, liftEnd: 2.75,
+  caseCloseStart: 2.9, caseCloseEnd: 3.6,
+  flyStart: 3.8, flyEnd: 6,
+  slotStart: 4.8, slotEnd: 5.65,
+  insertStart: 6.2, insertEnd: 7.45,
+  closeStart: 7.6, closeEnd: 8.15,
+  caseReturnStart: 8.2, caseReturnEnd: 9.8,
+  bootStart: 8.25, zoomEnd: 10.7, end: 11.7,
 } as const;
 
 export type DomainPhase = "idle" | "presenting" | "choosing" | "opening" | "lifting" | "travelling" | "inserting" | "closing" | "booting" | "active" | "returning";

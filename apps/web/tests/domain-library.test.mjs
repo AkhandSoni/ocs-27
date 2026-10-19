@@ -31,7 +31,6 @@ function setup() {
   device.add(body); device.position.set(-3.65, 2.16, -.05); scene.add(device);
   const shelf = container.querySelector('.domain-shelf-target');
   const choices = [...container.querySelectorAll('.domain-case-target')];
-  const labels = [...container.querySelectorAll('.domain-label')];
   function advance(seconds, reduced = false) {
     for (let t = 0; t < seconds; t += 1 / 120) library.advance(1 / 120, reduced);
     library.draw(1440, 900, 8.3);
@@ -51,7 +50,7 @@ function setup() {
     dom.window.close();
     globalThis.document = previousDocument;
   }
-  return { dom, scene, camera, container, library, device, shelf, stickyNote, choices, labels, choose, advance, cleanup, state: () => state };
+  return { dom, scene, camera, container, library, device, shelf, stickyNote, choices, choose, advance, cleanup, state: () => state };
 }
 
 test('Domains note is labelled, lifts on collection hover, and settles when the selector opens', () => {
@@ -138,8 +137,7 @@ test('clicking a fanned case brings it forward without inserting its disc', () =
     assert.ok(management.position.z > tech.position.z, 'selected case is physically in front');
     assert.equal(f.choices[4].getAttribute('aria-pressed'), 'true');
     assert.ok(f.choices[4].style.clipPath.startsWith('polygon('));
-    assert.equal(f.labels[4].getAttribute('aria-pressed'), 'true');
-    assert.equal(f.labels[4].textContent, '05Management');
+    assert.equal(f.container.querySelector('.domain-labels'), null, 'identification is printed on the cases');
     f.choices[4].click();
     assert.equal(f.state().selected, 4);
     assert.equal(f.state().phase, 'opening');
@@ -163,18 +161,32 @@ test('reduced motion settles every case before the portrait camera focuses the T
   } finally { f.cleanup(); }
 });
 
-test('the vertical names select the matching case and a second activation inserts it', () => {
+test('the departing disc clears the actual open case geometry before travelling to the drive', () => {
   const f = setup();
   try {
     f.library.setDevice(f.device); f.shelf.click(); f.advance(2);
-    assert.deepEqual(f.labels.map(label => label.querySelector('strong').textContent), ['Tech', 'Research', 'Competitive Coding', 'Design', 'Management']);
-    assert.equal(f.container.querySelector('.domain-labels').hidden, false);
-    f.labels[3].click();
-    assert.equal(f.state().selected, null);
-    f.advance(.65); f.labels[3].click(); f.advance(.02);
-    assert.equal(f.state().selected, 3);
-    assert.equal(f.container.querySelector('.domain-labels').hidden, true);
-    assert.equal(f.scene.getObjectByName('Printed domain disc label').material.map.image.dataset.domain, 'design');
+    f.choose(0);
+    const holder = f.scene.getObjectByName('Tech disc case');
+    const disc = f.scene.getObjectByName('Removable domain disc');
+    holder.traverse(node => { if (node.isMesh) for (const material of [node.material].flat()) material.side = THREE.DoubleSide; });
+    const ray = new THREE.Raycaster();
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), direction = new THREE.Vector3();
+    const dt = 1 / 120;
+    for (let time = 0; time < CUES.flyEnd; time += dt) {
+      f.library.advance(dt, false); f.library.draw(1440, 900, 8.3);
+      if (time < CUES.liftStart + .25) continue;
+      disc.updateWorldMatrix(true, false);
+      for (let i = 0; i < 48; i++) {
+        const angle = i * Math.PI * 2 / 48;
+        const next = (i + 1) * Math.PI * 2 / 48;
+        a.set(Math.cos(angle) * .201, Math.sin(angle) * .201, 0).applyMatrix4(disc.matrixWorld);
+        b.set(Math.cos(next) * .201, Math.sin(next) * .201, 0).applyMatrix4(disc.matrixWorld);
+        direction.subVectors(b, a);
+        ray.set(a, direction.clone().normalize()); ray.far = direction.length(); ray.near = .00001;
+        assert.equal(ray.intersectObject(holder, true).length, 0, `disc perimeter crosses the case at ${time.toFixed(3)}s`);
+      }
+    }
+    assert.equal(f.container.querySelector('.domain-labels'), null);
   } finally { f.cleanup(); }
 });
 

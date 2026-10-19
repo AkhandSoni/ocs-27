@@ -13,6 +13,17 @@ function choose(index = 0) {
   return sequence;
 }
 
+test('the disc releases toward the viewer, waits for the case to close, then travels', () => {
+  assert.ok(CUES.liftEnd < CUES.caseCloseStart);
+  assert.ok(CUES.caseCloseEnd < CUES.flyStart);
+  const hold = sampleLoad((CUES.caseCloseEnd + CUES.flyStart) / 2);
+  assert.equal(hold.lift, 1);
+  assert.equal(hold.lid, 0);
+  assert.equal(hold.fly, 0);
+  assert.equal(hold.discVisible, true);
+  for (let t = CUES.flyStart; t < CUES.insertEnd; t += .01) assert.equal(sampleLoad(t).lid, 0);
+});
+
 test('the latest domain list has five distinct, selectable cases', () => {
   assert.deepEqual(DOMAINS.map(domain => domain.name), ['Tech', 'Research', 'Competitive Coding', 'Design', 'Management']);
   assert.equal(new Set(DOMAINS.map(domain => domain.id)).size, 5);

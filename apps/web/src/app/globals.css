@@ -9,15 +9,6 @@
 .domain-shelf-target:focus-visible{outline:1px solid #e4d6a2;outline-offset:4px;background:#e4d6a207}
 .domain-case-target>span{display:none}
 .domain-case-target:focus-visible{outline:none!important;background:#e9f4ff18!important;box-shadow:inset 0 0 0 2px #e4f1ffa6}
-.domain-labels{position:absolute;z-index:2000;right:5%;top:50%;transform:translateY(-50%);width:210px;display:flex;flex-direction:column;gap:8px;padding:18px 0;pointer-events:auto}
-.domain-labels[hidden]{display:none}
-.domain-interactions .domain-label{position:relative;display:flex;align-items:center;gap:15px;width:100%;min-height:57px;padding:12px 15px;text-align:left;border-radius:0;border-left:1px solid #ffffff30;background:linear-gradient(90deg,#090e18b3,#090e1833);color:#c2c9d3;transition:color .22s,border-color .22s,background .22s}
-.domain-label>span{font:10px monospace;color:var(--domain-ink);opacity:.65}
-.domain-label>strong{font-size:15px;font-weight:500;line-height:1.3;letter-spacing:.015em}
-.domain-interactions .domain-label[aria-pressed=true]{border-left:3px solid var(--domain-ink);color:#fff;background:linear-gradient(90deg,#101c2ef2,#101c2e80);box-shadow:-10px 0 35px -24px var(--domain-ink)}
-.domain-interactions .domain-label:hover{color:#fff;border-color:var(--domain-ink);background:#152032d9}
-@media(max-width:1000px){.domain-labels{right:2%;width:170px}.domain-label>strong{font-size:13px}.domain-interactions .domain-label{gap:10px;padding:12px 10px}}
-@media(max-width:600px){.domain-labels{right:4%;top:auto;bottom:max(24px,env(safe-area-inset-bottom));transform:none;left:4%;width:auto;gap:0;padding:0;background:#08101cdb;backdrop-filter:blur(14px)}.domain-interactions .domain-label{min-height:36px;padding:8px 13px;background:transparent}.domain-label>strong{font-size:12px}.domain-label>span{font-size:9px}}
 .domain-transport{position:absolute;inset:0;z-index:5;pointer-events:none}
 .domain-transport>button{position:absolute;top:max(18px,env(safe-area-inset-top));right:max(20px,env(safe-area-inset-right));display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid #d7e1ec35;border-radius:6px;background:#0c111be8;box-shadow:0 3px 15px #0002;color:#e0e6ee;font-size:12px;pointer-events:auto;touch-action:manipulation}
 .domain-transport>button:hover:not(:disabled){border-color:#e1ebfc88;background:#161f2bef}.domain-transport>button:disabled{opacity:.65;cursor:default}.domain-transport kbd{font:inherit;font-size:9px;opacity:.5;padding-left:8px;border-left:1px solid #ffffff20}

@@ -32,7 +32,7 @@ export function makeCaseLayout(roomZ: number, aspect: number, fov: number, front
   const rotations = DOMAINS.map((_, i) => new THREE.Quaternion().setFromEuler(new THREE.Euler(-.045, -.10, (2 - ranks[i]) * (narrow ? .11 : .16))));
   return {
     positions, rotations, order, frontIndex, distance,
-    focusPosition: new THREE.Vector3(-.06, centerY + .025, roomZ - distance - .12),
+    focusPosition: new THREE.Vector3(-.06, centerY - .25, roomZ - distance - .8),
     focusRotation: new THREE.Quaternion().setFromEuler(new THREE.Euler(.025, -.10, -.025)),
   };
 }
@@ -87,17 +87,19 @@ export class DiscMotion {
     holder.updateWorldMatrix(true, false);
     drive.updateWorldMatrix(true, false);
     this.seated.set(0, 0, .012).applyMatrix4(holder.matrixWorld);
-    this.lifted.set(0, .04, .28).applyMatrix4(holder.matrixWorld);
+    this.lifted.set(0, 0, .62).applyMatrix4(holder.matrixWorld);
     this.approach.set(0, 0, DISC_RADIUS + .18).applyMatrix4(drive.matrixWorld);
     this.inserted.set(0, 0, -DISC_RADIUS - .045).applyMatrix4(drive.matrixWorld);
     holder.getWorldQuaternion(this.fromRotation);
     drive.getWorldQuaternion(this.toRotation).multiply(this.edgeRotation);
     if (pose.fly === 0) {
+      // Pull straight toward the viewer, beyond the lid's complete swept arc.
+      // Hold this pose while the case closes; only then travel and rotate.
       this.disc.position.lerpVectors(this.seated, this.lifted, pose.lift);
       this.disc.quaternion.copy(this.fromRotation);
     } else {
-      this.control1.set(-.45, .55, .20).add(this.lifted);
-      this.control2.set(.2, .65, .55).add(this.approach);
+      this.control1.set(0, .12, .95).applyMatrix4(holder.matrixWorld);
+      this.control2.set(.2, .45, 1).add(this.approach);
       const t = pose.fly, u = 1 - t;
       this.disc.position.copy(this.lifted).multiplyScalar(u * u * u)
         .addScaledVector(this.control1, 3 * u * u * t)

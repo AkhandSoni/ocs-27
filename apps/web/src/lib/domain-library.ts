@@ -124,21 +124,6 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     overlay.appendChild(button);
     return button;
   });
-  const labels = document.createElement("div");
-  labels.className = "domain-labels"; labels.hidden = true;
-  labels.setAttribute("aria-label", "Domains");
-  const labelButtons = DOMAINS.map((domain, i) => {
-    const label = document.createElement("button");
-    label.type = "button"; label.className = "domain-label";
-    label.setAttribute("aria-label", `Choose ${domain.name}`);
-    label.setAttribute("aria-pressed", String(i === previewIndex));
-    label.style.setProperty("--domain-ink", domain.color);
-    const number = document.createElement("span"); number.textContent = String(i + 1).padStart(2, "0");
-    const name = document.createElement("strong"); name.textContent = domain.name;
-    label.append(number, name); label.onclick = () => activate(i);
-    labels.appendChild(label); return label;
-  });
-  overlay.appendChild(labels);
   function activate(index: number) {
     if (sequence.state.phase !== "choosing") return;
     if (index !== previewIndex) { preview(index); return; }
@@ -153,7 +138,6 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     targetLayout = makeCaseLayout(lastView.z, lastView.aspect, lastView.fov, previewIndex);
     fanProgress = 0;
     buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === previewIndex)));
-    labelButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === previewIndex)));
     container.dataset.domainPreview = DOMAINS[previewIndex].id;
   }
   container.appendChild(overlay);
@@ -182,11 +166,9 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     shelf.hidden = next.phase !== "idle";
     shelf.setAttribute("aria-expanded", String(next.phase !== "idle"));
     buttons.forEach(button => { button.hidden = next.phase !== "choosing"; });
-    labels.hidden = next.phase !== "choosing";
     if (next.phase === "idle") {
       previewIndex = 0; fanProgress = 1; layoutKey = "";
       buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
-      labelButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
       delete container.dataset.domainPreview;
     } else if (next.phase === "choosing") container.dataset.domainPreview = DOMAINS[previewIndex].id;
     container.dataset.domainPhase = next.phase;

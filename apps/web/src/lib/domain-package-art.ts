@@ -119,6 +119,17 @@ export function paintPackage(index: number, disc = false) {
   if (disc) {
     ctx.fillStyle = "#f0f3ee"; ctx.font = "bold italic 23px Arial"; ctx.textAlign = "center"; ctx.fillText("PS5", 256, 83);
     ctx.strokeStyle = "#c7ced99c"; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(256, 256, 249, 0, Math.PI * 2); ctx.stroke();
+  } else {
+    // The exposed right edge identifies every overlapping case, like a card
+    // index. It is printed on the sleeve and follows the actual 3D geometry.
+    ctx.fillStyle = edition.ink; ctx.fillRect(458, 54, 54, 586);
+    ctx.fillStyle = "#07121c"; ctx.textAlign = "center"; ctx.font = "bold 18px monospace";
+    ctx.fillText(String(index + 1).padStart(2, "0"), 485, 87);
+    ctx.save(); ctx.translate(478, 115); ctx.rotate(Math.PI / 2);
+    ctx.textAlign = "left"; ctx.font = "bold 20px Arial";
+    ctx.fillText(DOMAINS[index].name.toUpperCase(), 0, 0, 465);
+    ctx.restore();
+    ctx.fillStyle = "#07121c"; ctx.fillRect(480, 606, 10, 10);
   }
   canvas.dataset.domain = DOMAINS[index].id;
   return canvas;
