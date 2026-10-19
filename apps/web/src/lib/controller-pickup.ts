@@ -88,14 +88,17 @@ export function createControllerPickup(model: THREE.Object3D, camera: THREE.Came
   let hovering = false;
   let down: { x: number; y: number; hit: boolean } | null = null;
   let disposed = false;
+  let enabled = true;
   let castsRoomShadow = true;
 
   function toggle() {
+    if (!enabled) return;
     motion.toggle();
     button.setAttribute("aria-label", motion.held ? "Put controller back" : "Pick up controller");
     button.setAttribute("aria-pressed", String(motion.held));
   }
   function intersects(event: MouseEvent | PointerEvent) {
+    if (!enabled) return false;
     const rect = container.getBoundingClientRect();
     pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
@@ -118,7 +121,7 @@ export function createControllerPickup(model: THREE.Object3D, camera: THREE.Came
   }
   function leave() { hovering = false; down = null; container.classList.remove("controller-hover"); }
   function key(event: KeyboardEvent) {
-    if (event.key === "Escape" && motion.held) {
+    if (enabled && event.key === "Escape" && motion.held) {
       event.preventDefault(); event.stopPropagation(); toggle();
     }
   }
@@ -131,6 +134,17 @@ export function createControllerPickup(model: THREE.Object3D, camera: THREE.Came
   button.addEventListener("click", keyboardClick);
 
   return {
+    setEnabled(value: boolean) {
+      if (enabled === value) return;
+      enabled = value;
+      button.disabled = !value;
+      leave();
+      if (!value && motion.held) {
+        motion.toggle();
+        button.setAttribute("aria-label", "Pick up controller");
+        button.setAttribute("aria-pressed", "false");
+      }
+    },
     update(delta: number, time: number, pointerX: number, pointerY: number) {
       if (disposed) return;
       motion.update(delta, time, pointerX, pointerY);

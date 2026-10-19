@@ -1,16 +1,25 @@
 import * as THREE from "three";
-import { MeshBasicNodeMaterial, WebGPURenderer } from "three/webgpu";
+import { MeshBasicNodeMaterial, PMREMGenerator, WebGPURenderer } from "three/webgpu";
 import { vec4 } from "three/tsl";
 import { CSS3DObject, CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { buildRoom } from "./room-objects";
 import { createControllerPickup } from "./controller-pickup";
+import { createDomainLibrary } from "./domain-library";
+import type { DomainState } from "./domain-sequence";
+import { roomCameraZ, tvCameraZ } from "./domain-spatial";
+import { finishDeviceMaterial } from "./device-finish";
 
 export type RoomController = {
   setAccent: (color: string) => void;
   setLighting: (warm: boolean) => void;
   setFocus: (focused: boolean) => void;
+  exitDomain: () => void;
+  focusDomainCase: () => void;
+  focusDiscShelf: () => void;
   dispose: () => void;
 };
 
@@ -18,6 +27,7 @@ export type RoomCallbacks = {
   onReady: (renderer: "WebGPU" | "WebGL 2") => void;
   onError: (message: string) => void;
   onAssetError: (message: string) => void;
+  onDomainState: (state: DomainState) => void;
 };
 
 /** A single camera drives the GPU scene and the accessible, interactive TV plane. */
@@ -84,9 +94,36 @@ export async function createRoom(
     cssRenderer.domElement.remove();
     throw new Error(`The room textures could not load. ${error instanceof Error ? error.message : "Please try again."}`);
   }
-  const ambient = new THREE.HemisphereLight("#e1ded6", "#7d593c", 1.35);
+  // A one-time, small reflection capture gives plastic, metal and discs a
+  // coherent room to reflect. No external HDR download or per-frame capture.
+  const environmentScene = new RoomEnvironment();
+  const environmentGenerator = new PMREMGenerator(renderer);
+  const previousTarget = renderer.getRenderTarget();
+  const previousFace = renderer.getActiveCubeFace();
+  const previousMip = renderer.getActiveMipmapLevel();
+  const previousAutoClear = renderer.autoClear;
+  let environmentTarget: Awaited<ReturnType<PMREMGenerator["fromSceneAsync"]>> | undefined;
+  let failedEnvironmentTarget: ReturnType<WebGPURenderer["getRenderTarget"]> = null;
+  try {
+    environmentTarget = await environmentGenerator.fromSceneAsync(environmentScene, .04, .1, 100, { size: 128 });
+    scene.environment = environmentTarget.texture;
+    scene.environmentIntensity = .38;
+    scene.environmentRotation.y = .35;
+  } catch (error) {
+    failedEnvironmentTarget = renderer.getRenderTarget();
+    callbacks.onAssetError(`Room reflections are unavailable: ${error instanceof Error ? error.message : "using direct lighting"}`);
+  } finally {
+    // PMREM's own cleanup runs only on success. A failed capture must not
+    // leave the first visible frame rendering into its offscreen texture.
+    renderer.setRenderTarget(previousTarget, previousFace, previousMip);
+    renderer.autoClear = previousAutoClear;
+    if (failedEnvironmentTarget && failedEnvironmentTarget !== previousTarget) failedEnvironmentTarget.dispose();
+    environmentScene.dispose();
+    environmentGenerator.dispose();
+  }
+  const ambient = new THREE.HemisphereLight("#e0e4ef", "#6d503a", .85);
   scene.add(ambient);
-  const fill = new THREE.DirectionalLight("#e9e5dc", 2.4);
+  const fill = new THREE.DirectionalLight("#e9edf6", 1.8);
   fill.position.set(-3, 6, 6);
   scene.add(fill);
   const key = new THREE.SpotLight("#ffbf80", 75, 20, 0.8, 0.7, 1.5);
@@ -99,15 +136,21 @@ export async function createRoom(
   scene.add(key, key.target);
 
   // The TV is real black geometry; only its display is a DOM surface.
-  const black = new THREE.MeshStandardMaterial({ color: "#050606", roughness: 0.28, metalness: 0.52 });
+  const black = new THREE.MeshStandardMaterial({ color: "#101113", roughness: .38, metalness: .08 });
   const tvGroup = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(5.84, 3.38, 0.18), black);
+  const body = new THREE.Mesh(new RoundedBoxGeometry(5.84, 3.38, .18, 3, .025), black);
   body.position.set(0, 3.65, -0.48);
   body.castShadow = true;
   tvGroup.add(body);
-  const rim = new THREE.Mesh(new THREE.BoxGeometry(5.73, 3.27, 0.045), new THREE.MeshStandardMaterial({ color: "#111313", metalness: 0.75, roughness: 0.22 }));
+  const rim = new THREE.Mesh(new RoundedBoxGeometry(5.73, 3.27, .045, 2, .012), new THREE.MeshStandardMaterial({ color: "#242629", metalness: .78, roughness: .3 }));
   rim.position.set(0, 3.65, -0.377);
   tvGroup.add(rim);
+  const neck = new THREE.Mesh(new THREE.BoxGeometry(.23, .5, .095), black);
+  neck.position.set(0, 1.73, -.53); neck.castShadow = true; tvGroup.add(neck);
+  const stand = new THREE.Mesh(new RoundedBoxGeometry(.9, .035, .44, 2, .012), black);
+  stand.position.set(0, 1.47, -.46); stand.castShadow = true; tvGroup.add(stand);
+  const sensor = new THREE.Mesh(new THREE.SphereGeometry(.013, 12, 8), black);
+  sensor.position.set(.075, 1.984, -.377); tvGroup.add(sensor);
   // A depth-tested transparent aperture reveals the DOM display below the GPU
   // canvas. Foreground geometry can now cover the screen without a second renderer.
   const aperture = new MeshBasicNodeMaterial({ transparent: true, blending: THREE.NoBlending, fog: false, toneMapped: false });
@@ -125,6 +168,10 @@ export async function createRoom(
   const models: THREE.Object3D[] = [];
   const mixers: THREE.AnimationMixer[] = [];
   let pickup: ReturnType<typeof createControllerPickup> | undefined;
+  const library = createDomainLibrary(scene, camera, container, state => {
+    pickup?.setEnabled(state.phase === "idle");
+    callbacks.onDomainState(state);
+  });
 
   async function addModel(path: string, height: number, position: THREE.Vector3, rotation: THREE.Euler) {
     try {
@@ -154,11 +201,7 @@ export async function createRoom(
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material: THREE.Material) => {
             if (material instanceof THREE.MeshStandardMaterial) {
-              material.envMapIntensity = 0.8;
-              // Exported controller shells are opaque despite a BLEND flag.
-              material.transparent = false;
-              material.depthWrite = true;
-              material.needsUpdate = true;
+              finishDeviceMaterial(material, path.includes("dualsense") ? "controller" : "ps5");
             }
           });
         }
@@ -177,23 +220,32 @@ export async function createRoom(
   }
 
   void Promise.all([
-    addModel("/models/ps5-optimized.glb", 1.4, new THREE.Vector3(-3.65, 1.46, -0.05), new THREE.Euler(0, 0.08, 0)),
+    addModel("/models/ps5-optimized.glb", 1.4, new THREE.Vector3(-3.65, 1.46, -0.05), new THREE.Euler(0, 0.08, 0)).then(model => {
+      if (disposed) return;
+      if (model) library.setDevice(model);
+      else library.setUnavailable();
+    }),
     addModel("/models/dualsense-optimized.glb", 0.51, new THREE.Vector3(-2.47, 1.45, 0.28), new THREE.Euler(-0.25, Math.PI - 0.08, 0.02)).then(model => {
-      if (model && !disposed) pickup = createControllerPickup(model, camera, container, () => reducedMotion.matches);
+      if (model && !disposed) {
+        pickup = createControllerPickup(model, camera, container, () => reducedMotion.matches);
+        pickup.setEnabled(!library.busy);
+      }
     }),
   ]);
 
   let width = 0;
   let height = 0;
+  let viewportChanged = true;
   function resize() {
-    width = container.clientWidth;
-    height = container.clientHeight;
+    width = Math.max(1, container.clientWidth);
+    height = Math.max(1, container.clientHeight);
     renderer.setSize(width, height);
     cssRenderer.setSize(width, height);
     camera.aspect = width / height;
     // Keep the complete TV usable on narrower screens.
     camera.fov = width < 680 ? 48 : 38;
     camera.updateProjectionMatrix();
+    viewportChanged = true;
   }
   const observer = new ResizeObserver(resize);
   observer.observe(container);
@@ -206,7 +258,7 @@ export async function createRoom(
     pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
     pointerY = (event.clientY / window.innerHeight - 0.5) * 2;
   }
-  function onVisibility() { visible = !document.hidden; }
+  function onVisibility() { visible = !document.hidden; lastFrameTime = performance.now(); }
   window.addEventListener("pointermove", onPointer, { passive: true });
   document.addEventListener("visibilitychange", onVisibility);
 
@@ -215,27 +267,41 @@ export async function createRoom(
   const coolColor = new THREE.Color("#a0c6e9");
   const warmBackground = new THREE.Color("#161512");
   const coolBackground = new THREE.Color("#14191e");
-  const clock = new THREE.Clock();
-  const start = performance.now();
+  let lastFrameTime = performance.now();
+  let time = 0;
   let frameCount = 0;
 
   await renderer.setAnimationLoop(() => {
+    const now = performance.now();
+    const delta = Math.min((now - lastFrameTime) / 1000, .05);
+    lastFrameTime = now;
     if (disposed || !visible || !inView) return;
-    const delta = Math.min(clock.getDelta(), 0.05);
-    const time = (performance.now() - start) / 1000;
+    time += delta;
+    library.advance(delta, reducedMotion.matches);
     const isMobile = width < 680;
     const intro = reducedMotion.matches ? 1 : 1 - Math.pow(1 - Math.min(time / 2.8, 1), 4);
     const screenFitZ = 5.84 / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect * 0.9) - 0.35;
     const baseZ = isMobile ? Math.max(15.3, screenFitZ + 1.4) : Math.max(12.4, screenFitZ + 1.4);
-    const targetZ = focused ? Math.max(8.0, screenFitZ) : baseZ + (1 - intro) * 1.0;
-    const motion = reducedMotion.matches || focused ? 0 : 1;
-    const ease = 1 - Math.exp(-delta * 3);
+    const roomZ = Math.max(8.0, screenFitZ);
+    const stagingZ = roomCameraZ(camera.aspect, camera.fov, true);
+    const normalZ = library.busy ? stagingZ : focused ? roomZ : baseZ + (1 - intro) * 1.0;
+    const tvZ = tvCameraZ(camera.aspect, camera.fov);
+    const zoom = reducedMotion.matches ? (library.zoom > 0 ? 1 : 0) : library.zoom;
+    const targetZ = THREE.MathUtils.lerp(normalZ, tvZ, zoom);
+    const motion = reducedMotion.matches || focused || library.busy ? 0 : 1;
+    // Resize is a reframe, not a camera flight. Apply its layout and camera in
+    // the same rendered frame so foreground cases never cross the near plane.
+    const ease = reducedMotion.matches || viewportChanged ? 1 : 1 - Math.exp(-delta * 5);
+    viewportChanged = false;
     camera.position.x = THREE.MathUtils.lerp(camera.position.x, pointerX * 0.18 * motion, ease);
     const roomTargetY = isMobile ? 3.10 : 2.55;
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, (focused ? 3.66 : roomTargetY + 0.05) - pointerY * 0.05 * motion, ease);
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, ease);
     lookTarget.y = THREE.MathUtils.lerp(lookTarget.y, focused ? 3.65 : roomTargetY, ease);
     camera.lookAt(lookTarget);
+    camera.updateMatrixWorld();
+    library.draw(width, height, stagingZ);
+    screenElement.style.setProperty("--disc-boot", library.bootProgress.toFixed(5));
     pickup?.update(delta, time, pointerX, pointerY);
     room.accentLights.forEach((light, i) => {
       // Preserve the blue/pink split from the room reference; selection adds a subtle tint.
@@ -244,7 +310,9 @@ export async function createRoom(
       const screenTint = light.userData.screenTint as THREE.Color | undefined;
       const target = screenTint ?? new THREE.Color();
       light.userData.screenTint = target;
-      target.copy(referenceColor).lerp(accentTarget, 0.18);
+      if (library.accent) target.set(library.accent);
+      else target.copy(accentTarget);
+      target.lerp(referenceColor, .82);
       light.color.lerp(target, ease);
       light.intensity = (light.userData.baseIntensity as number) * (1 + (reducedMotion.matches ? 0 : Math.sin(time * 0.7 + i) * 0.035));
     });
@@ -273,6 +341,9 @@ export async function createRoom(
     setAccent(color) { accentTarget.set(color); },
     setLighting(value) { warm = value; },
     setFocus(value) { focused = value; },
+    exitDomain() { library.exit(); },
+    focusDomainCase() { library.focusChoice(); },
+    focusDiscShelf() { library.focusShelf(); },
     dispose() {
       disposed = true;
       void renderer.setAnimationLoop(null);
@@ -281,8 +352,10 @@ export async function createRoom(
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("visibilitychange", onVisibility);
       pickup?.dispose();
+      library.dispose();
       mixers.forEach((mixer) => mixer.stopAllAction());
       disposeObject(scene);
+      environmentTarget?.dispose();
       renderer.dispose();
       renderer.domElement.remove();
       cssRenderer.domElement.remove();

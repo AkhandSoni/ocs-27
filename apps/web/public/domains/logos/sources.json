@@ -1,0 +1,110 @@
+[
+  {
+    "name": "react",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/react/react-original.svg"
+  },
+  {
+    "name": "nextjs",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/nextjs/nextjs-original.svg"
+  },
+  {
+    "name": "nodejs",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/nodejs/nodejs-original.svg"
+  },
+  {
+    "name": "postgresql",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/postgresql/postgresql-original.svg"
+  },
+  {
+    "name": "docker",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/docker/docker-original.svg"
+  },
+  {
+    "name": "typescript",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/typescript/typescript-original.svg"
+  },
+  {
+    "name": "python",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/python/python-original.svg"
+  },
+  {
+    "name": "jupyter",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/jupyter/jupyter-original.svg"
+  },
+  {
+    "name": "numpy",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/numpy/numpy-original.svg"
+  },
+  {
+    "name": "latex",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/latex/latex-original.svg"
+  },
+  {
+    "name": "pandas",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/pandas/pandas-original.svg"
+  },
+  {
+    "name": "cpp",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/cplusplus/cplusplus-original.svg"
+  },
+  {
+    "name": "figma",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/figma/figma-original.svg"
+  },
+  {
+    "name": "blender",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/blender/blender-original.svg"
+  },
+  {
+    "name": "photoshop",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/photoshop/photoshop-original.svg"
+  },
+  {
+    "name": "illustrator",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/illustrator/illustrator-plain.svg"
+  },
+  {
+    "name": "aftereffects",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/aftereffects/aftereffects-original.svg"
+  },
+  {
+    "name": "notion",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/notion/notion-original.svg"
+  },
+  {
+    "name": "trello",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/trello/trello-original.svg"
+  },
+  {
+    "name": "slack",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/6a37858047b0e8d9c9c0e68f4a071fc410652e89/icons/slack/slack-original.svg"
+  },
+  {
+    "name": "owasp",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/owasp.svg"
+  },
+  {
+    "name": "leetcode",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/leetcode.svg"
+  },
+  {
+    "name": "codeforces",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/codeforces.svg"
+  },
+  {
+    "name": "arxiv",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/arxiv.svg"
+  },
+  {
+    "name": "zotero",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/zotero.svg"
+  },
+  {
+    "name": "sheets",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/googlesheets.svg"
+  },
+  {
+    "name": "miro",
+    "source": "https://raw.githubusercontent.com/simple-icons/simple-icons/4d29a35c954699b389a834aacc97dd6e7e74143c/icons/miro.svg"
+  }
+]

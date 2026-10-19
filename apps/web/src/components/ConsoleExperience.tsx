@@ -10,7 +10,7 @@ import styles from "./ConsoleExperience.module.css";
 export type ConsoleUser = { id: string; name: string; email: string; avatar: string };
 type ProfileHint = Pick<ConsoleUser, "name" | "email" | "avatar">;
 type Stage = "checking" | "boot" | "users" | "signin" | "register" | "home";
-type ConsoleExperienceProps = { children: ReactNode; ready?: boolean; onHome?: (home: boolean) => void; onUserChange?: (user: ConsoleUser | null) => void };
+type ConsoleExperienceProps = { children: ReactNode; ready?: boolean; suspended?: boolean; onHome?: (home: boolean) => void; onUserChange?: (user: ConsoleUser | null) => void };
 
 const BOOT_KEY = "ps5:boot-seen:v1";
 const PROFILE_KEY = "ps5:profiles:v1";
@@ -148,7 +148,7 @@ function readProfileHints(): ProfileHint[] {
   } catch { return []; }
 }
 
-export default function ConsoleExperience({ children, ready = true, onHome, onUserChange }: ConsoleExperienceProps) {
+export default function ConsoleExperience({ children, ready = true, suspended = false, onHome, onUserChange }: ConsoleExperienceProps) {
   const [stage, setStage] = useState<Stage>("checking");
   const [user, setUser] = useState<ConsoleUser | null>(null);
   const [profiles, setProfiles] = useState<ProfileHint[]>([]);
@@ -218,11 +218,11 @@ export default function ConsoleExperience({ children, ready = true, onHome, onUs
   }, [stage, ready]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || suspended) return;
     if (stage === "users") (screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-known]") ?? screenRef.current?.querySelector<HTMLButtonElement>("[data-profile-card]"))?.focus({ preventScroll: true });
     if (stage === "signin") (selectedProfile ? passwordRef.current : emailRef.current)?.focus({ preventScroll: true });
     if (stage === "register") nameRef.current?.focus({ preventScroll: true });
-  }, [stage, selectedProfile, ready]);
+  }, [stage, selectedProfile, ready, suspended]);
 
   useEffect(() => {
     const openUsers = () => { setStage((current) => current === "home" ? "users" : current); setError(""); setSystemError(""); };
@@ -288,7 +288,7 @@ export default function ConsoleExperience({ children, ready = true, onHome, onUs
   const isForm = stage === "signin" || stage === "register";
   const registering = stage === "register";
   return <div ref={screenRef} className={`${styles.console} ${stage === "boot" && !ready ? styles.bootPaused : ""} ${isForm ? styles.formScreen : ""}`} data-console-stage={stage} role="region" aria-label="PlayStation 5 console" onKeyDown={handleKeys}>
-    <ParticleBackground boot={stage === "boot"} quiet={isForm || stage === "checking"} paused={stage === "boot" && !ready} />
+    <ParticleBackground boot={stage === "boot"} quiet={isForm || stage === "checking"} paused={suspended || (stage === "boot" && !ready)} />
     <div className={styles.vignette} aria-hidden="true" />
 
     {stage === "checking" && <div className={styles.checking} role="status" aria-label="Starting console"><span /><span /><span /></div>}

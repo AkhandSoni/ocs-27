@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DOMAIN_SHELF_INDICES } from './domain-sequence';
 
 type RoomObjects = {
   accentLights: THREE.PointLight[];
@@ -41,7 +42,7 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
   const softBlack = material('#101311', 0.85);
   const brass = material('#8c7958', 0.44, 0.64);
   const cabinetWood = new THREE.MeshStandardMaterial({
-    color: '#e4c09b', map: cabinetMap, roughness: 0.67,
+    color: '#e4c09b', map: cabinetMap, bumpMap: cabinetMap, bumpScale: .006, roughness: .58,
   });
   const slatWood = new THREE.MeshStandardMaterial({
     color: '#8a7056', map: slatMap, roughness: 0.82,
@@ -151,7 +152,7 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
   // Individual boards make the floor read as wood even under soft, low light.
   box(22, 0.12, 20, material('#171814'), 0, -0.105, 5.0);
   const floorMaterial = new THREE.MeshStandardMaterial({
-    color: '#776149', map: floorMap, roughness: 0.64, metalness: 0.02,
+    color: '#776149', map: floorMap, bumpMap: floorMap, bumpScale: .008, roughness: .64, metalness: .02,
   });
   const boards = new THREE.InstancedMesh(new THREE.BoxGeometry(3.38, 0.065, 1.12), floorMaterial, 126);
   let boardIndex = 0;
@@ -266,16 +267,31 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
   const soilMaterial = material('#211e17', 1);
   const plantStem = material('#535741', 0.88);
   const trunkMaterial = material('#5b4b37', 0.96);
+  const leafSurface = document.createElement('canvas');
+  leafSurface.width = leafSurface.height = 128;
+  const leafContext = leafSurface.getContext('2d')!;
+  leafContext.fillStyle = '#838383'; leafContext.fillRect(0, 0, 128, 128);
+  leafContext.strokeStyle = '#ababab'; leafContext.lineWidth = 1;
+  leafContext.beginPath(); leafContext.moveTo(64, 0); leafContext.lineTo(64, 128);
+  for (let y = 17; y < 128; y += 17) {
+    leafContext.moveTo(64, y); leafContext.quadraticCurveTo(37, y - 10, 8, y - 22);
+    leafContext.moveTo(64, y); leafContext.quadraticCurveTo(91, y - 10, 120, y - 22);
+  }
+  leafContext.stroke();
+  const leafBump = new THREE.CanvasTexture(leafSurface);
   const leafMaterial = new THREE.MeshStandardMaterial({
-    color: '#52694b', side: THREE.DoubleSide, roughness: 0.73, metalness: 0,
+    color: '#718565', side: THREE.DoubleSide, bumpMap: leafBump, bumpScale: .002, roughness: .57, metalness: 0,
   });
   const leafGeometry = makeLeafGeometry();
 
   function pot(x: number, y: number, z: number, radius: number, height: number, parent: THREE.Object3D = room) {
-    const ceramic = material('#383b32', 0.92);
-    cylinder(radius, radius * 0.78, height, ceramic, x, y + height / 2, z, parent, 40);
-    cylinder(radius * 1.035, radius * 1.035, 0.045, ceramic, x, y + height - 0.018, z, parent, 40);
-    cylinder(radius * 0.94, radius * 0.94, 0.008, soilMaterial, x, y + height + 0.001, z, parent, 28);
+    const ceramic = material('#484b40', .54);
+    const profile = [[0, .025], [.73, .025], [.79, .08], [.94, .88], [1, .96],
+      [.99, 1], [.92, 1], [.89, .94], [.76, .19], [0, .19]];
+    const vessel = new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r, h]) => new THREE.Vector2(r * radius, h * height)), 48), ceramic);
+    vessel.position.set(x, y, z); vessel.castShadow = vessel.receiveShadow = true; parent.add(vessel);
+    // Soil sits inside a curved rim, rather than capping the planter on top.
+    cylinder(radius * .875, radius * .875, .008, soilMaterial, x, y + height * .91, z, parent, 28);
     cylinder(radius * 0.79, radius * 0.79, 0.025, material('#22271f', 0.88), x, y + 0.01, z, parent, 32);
   }
 
@@ -448,16 +464,19 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
   // A shelf-like collection of blue PS5 cases fills the center of the cabinet.
   const caseBlue = material('#1765af', 0.48);
   const caseCount = 36;
-  const cases = new THREE.InstancedMesh(new THREE.BoxGeometry(0.066, 0.405, 0.34), caseBlue, caseCount);
+  const cases = new THREE.InstancedMesh(new THREE.BoxGeometry(0.066, 0.405, 0.34), caseBlue, caseCount - DOMAIN_SHELF_INDICES.length);
   const spinePositions: number[] = [];
   const spineUvs: number[] = [];
   const spineIndices: number[] = [];
+  let shelfInstance = 0;
   for (let i = 0; i < caseCount; i++) {
+    // These slots are occupied by the actual hinged domain cases.
+    if (DOMAIN_SHELF_INDICES.some(index => index === i)) continue;
     const x = -0.95 + i * 0.074;
     transform.position.set(x, 1.6525, 0.13);
     transform.updateMatrix();
-    cases.setMatrixAt(i, transform.matrix);
-    const vertex = i * 4;
+    cases.setMatrixAt(shelfInstance++, transform.matrix);
+    const vertex = spinePositions.length / 3;
     spinePositions.push(x - 0.028, 1.463, 0.302, x + 0.028, 1.463, 0.302,
       x + 0.028, 1.842, 0.302, x - 0.028, 1.842, 0.302);
     spineUvs.push(i / caseCount, 0, (i + 1) / caseCount, 0, (i + 1) / caseCount, 1, i / caseCount, 1);
