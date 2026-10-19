@@ -6,17 +6,8 @@ import styles from "./GameScreen.module.css";
 
 type Player = { id: string; name: string; email: string; avatar: string };
 type Props = { player?: Player | null; suspended?: boolean; onGameChange?: (color: string, title: string) => void };
-type Game = { id: string; title: string; tagline: string; description: string; color: string; genre: string };
-const games: Game[] = [
-  { id: "astro-bot", title: "ASTRO BOT", tagline: "JOIN ASTRO ON A SUPERSIZED SPACE ADVENTURE", description: "Explore extraordinary worlds, rescue your crew, and discover a galaxy full of surprises in ASTRO’s biggest adventure yet.", color: "#4092ff", genre: "Platformer · Adventure" },
-  { id: "elden-ring", title: "ELDEN RING", tagline: "RISE, TARNISHED, AND BECOME THE ELDEN LORD", description: "Journey through the Lands Between. Discover a vast world, face formidable enemies, and forge your own path.", color: "#dfb45e", genre: "Action RPG · Open world" },
-  { id: "god-of-war", title: "GOD OF WAR", tagline: "A NEW BEGINNING. A BOND WORTH FIGHTING FOR.", description: "Enter the realm of Norse gods with Kratos and Atreus. Explore wild landscapes and discover what it means to be a father.", color: "#75c3e8", genre: "Action · Adventure" },
-  { id: "spider-man", title: "MARVEL’S SPIDER-MAN", tagline: "BE GREATER", description: "Swing through Marvel’s New York. Master acrobatic combat and explore a spectacular city as Peter Parker.", color: "#e84854", genre: "Action · Open world" },
-  { id: "fc-24", title: "EA SPORTS FC 24", tagline: "WELCOME TO THE WORLD’S GAME", description: "Get closer to the action. Build your dream squad and take your place on the pitch.", color: "#72cf9e", genre: "Sports · Football" },
-  { id: "ghost-of-tsushima", title: "GHOST OF TSUSHIMA", tagline: "A STORM IS COMING. BECOME THE GHOST.", description: "Beyond war, ancient beauty endures. Roam the sweeping countryside of Tsushima and discover a new way forward.", color: "#cbb789", genre: "Action · Open world" },
-  { id: "stray", title: "STRAY", tagline: "A LITTLE LOST. A WORLD TO DISCOVER.", description: "Untangle an ancient mystery as a stray cat in a forgotten cybercity. Meet curious robots and find your way home.", color: "#e69a67", genre: "Adventure · Exploration" },
-  { id: "forza-horizon-5", title: "FORZA HORIZON 5", tagline: "YOUR ULTIMATE HORIZON ADVENTURE AWAITS", description: "Lead breathtaking expeditions across the vibrant landscapes of Mexico in hundreds of the world’s greatest cars.", color: "#db8cb9", genre: "Racing · Open world" },
-];
+import { GAMES as games } from "@/lib/game-catalog";
+
 const media = [
   { id: "youtube", name: "YouTube", color: "#e21a25", url: "https://www.youtube.com" },
   { id: "netflix", name: "NETFLIX", color: "#b90916", url: "https://www.netflix.com" },
@@ -27,6 +18,7 @@ const avatarColors: Record<string,string> = { astro: "#2884d6", horizon: "#d3915
 
 export default function GameScreen({ player, suspended = false, onGameChange }: Props) {
   const [selectedId, setSelectedId] = useState(games[0].id);
+  const [artworkIds, setArtworkIds] = useState([games[0].id]);
   const [tab, setTab] = useState<"games" | "media">("games");
   const [mediaId, setMediaId] = useState("youtube");
   const [panel, setPanel] = useState<"search" | "settings" | "profile" | "library" | "details" | null>(null);
@@ -46,6 +38,10 @@ export default function GameScreen({ player, suspended = false, onGameChange }: 
   const filteredGames = games.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => { onGameChange?.(game.color, game.title); }, [game, onGameChange]);
+  useEffect(() => {
+    // Keep recent backgrounds for crossfades without decoding the whole library.
+    setArtworkIds(previous => previous[previous.length - 1] === game.id ? previous : [...previous.filter(id => id !== game.id), game.id].slice(-3));
+  }, [game.id]);
   useEffect(() => {
     const updateTime = () => setTime(new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date()));
     updateTime(); const timer = setInterval(updateTime, 60000); return () => clearInterval(timer);
@@ -112,7 +108,7 @@ export default function GameScreen({ player, suspended = false, onGameChange }: 
     <div className={styles.screen} style={{ "--game-accent": game.color } as CSSProperties} data-game-screen ref={screenRef} tabIndex={overlayOpen ? -1 : 0} role="region" aria-label="PlayStation home" onKeyDown={handleKeys}>
       <div inert={overlayOpen} aria-hidden={overlayOpen || undefined} style={{ position: "absolute", inset: 0 }}>
       <div className={`${styles.artwork} ${tab === "media" ? styles.mediaArt : ""}`} aria-hidden="true">
-        {games.map(item => <img key={item.id} className={item.id === game.id ? styles.activeArtwork : ""} src={`/games/${item.id}-hero.jpg`} alt="" draggable={false} />)}
+        {games.filter(item => artworkIds.includes(item.id) || item.id === game.id).map(item => <img key={item.id} className={item.id === game.id ? styles.activeArtwork : ""} src={`/games/${item.id}-hero.jpg`} alt="" draggable={false} />)}
       </div>
       <div className={styles.shade} aria-hidden="true" />
       <header className={styles.header}>
