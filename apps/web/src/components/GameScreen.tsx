@@ -5,7 +5,7 @@ import { Bot, Check, ChevronLeft, Gamepad2, Grid2X2, LogOut, MoreHorizontal, Plu
 import styles from "./GameScreen.module.css";
 
 type Player = { id: string; name: string; email: string; avatar: string };
-type Props = { player?: Player | null; onGameChange?: (color: string, title: string) => void };
+type Props = { player?: Player | null; suspended?: boolean; onGameChange?: (color: string, title: string) => void };
 type Game = { id: string; title: string; tagline: string; description: string; color: string; genre: string };
 const games: Game[] = [
   { id: "astro-bot", title: "ASTRO BOT", tagline: "JOIN ASTRO ON A SUPERSIZED SPACE ADVENTURE", description: "Explore extraordinary worlds, rescue your crew, and discover a galaxy full of surprises in ASTRO’s biggest adventure yet.", color: "#4092ff", genre: "Platformer · Adventure" },
@@ -25,7 +25,7 @@ const media = [
 ];
 const avatarColors: Record<string,string> = { astro: "#2884d6", horizon: "#d39153", cosmic: "#42628f", sunset: "#ca755e", forest: "#527c65", violet: "#7e65ab" };
 
-export default function GameScreen({ player, onGameChange }: Props) {
+export default function GameScreen({ player, suspended = false, onGameChange }: Props) {
   const [selectedId, setSelectedId] = useState(games[0].id);
   const [tab, setTab] = useState<"games" | "media">("games");
   const [mediaId, setMediaId] = useState("youtube");
@@ -50,8 +50,9 @@ export default function GameScreen({ player, onGameChange }: Props) {
     const updateTime = () => setTime(new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date()));
     updateTime(); const timer = setInterval(updateTime, 60000); return () => clearInterval(timer);
   }, []);
-  useEffect(() => { screenRef.current?.focus({ preventScroll: true }); }, []);
+  useEffect(() => { if (!suspended) screenRef.current?.focus({ preventScroll: true }); }, [suspended]);
   useLayoutEffect(() => {
+    if (suspended) return;
     const dialog = launching ? launchRef.current : panelRef.current;
     if (overlayOpen && dialog) {
       const initial = panel === "search" ? dialog.querySelector<HTMLElement>("input") : dialog.querySelector<HTMLElement>('button:not([disabled]),a[href],input:not([disabled])');
@@ -62,16 +63,16 @@ export default function GameScreen({ player, onGameChange }: Props) {
       openerRef.current = null;
     }
     hadOverlayRef.current = overlayOpen;
-  }, [panel, launching, overlayOpen]);
+  }, [panel, launching, overlayOpen, suspended]);
   useEffect(() => {
-    if (!overlayOpen) return;
+    if (!overlayOpen || suspended) return;
     const dialog = launching ? launchRef.current : panelRef.current;
     if (!dialog) return;
     function focusable() {
       return Array.from(dialog!.querySelectorAll<HTMLElement>('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(node => node.getClientRects().length > 0 && !node.closest("[inert]"));
     }
     function containKeys(event: globalThis.KeyboardEvent) {
-      if (!dialog?.isConnected) return;
+      if (!dialog?.isConnected || dialog.closest("[inert]")) return;
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setPanel(null); setLaunching(false); return; }
       if (event.key !== "Tab") return;
       const nodes = focusable();
@@ -82,12 +83,12 @@ export default function GameScreen({ player, onGameChange }: Props) {
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({ preventScroll: true }); }
     }
     function containFocus(event: FocusEvent) {
-      if (dialog?.isConnected && event.target instanceof Node && !dialog.contains(event.target)) (focusable()[0] ?? dialog).focus({ preventScroll: true });
+      if (dialog?.isConnected && !dialog.closest("[inert]") && event.target instanceof Node && !dialog.contains(event.target)) (focusable()[0] ?? dialog).focus({ preventScroll: true });
     }
     document.addEventListener("keydown", containKeys, true);
     document.addEventListener("focusin", containFocus, true);
     return () => { document.removeEventListener("keydown", containKeys, true); document.removeEventListener("focusin", containFocus, true); };
-  }, [panel, launching, overlayOpen]);
+  }, [panel, launching, overlayOpen, suspended]);
 
   function rememberOpener(opener?: HTMLElement) {
     if (!overlayOpen) openerRef.current = opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : screenRef.current);
