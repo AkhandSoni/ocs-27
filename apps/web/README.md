@@ -8,7 +8,7 @@ Every browser launch and console power-on plays the short skippable boot sequenc
 
 The room retains the original optimized device models, perspective camera, CSS3D TV alignment, procedural furniture, lights, and model loader. The camera starts focused for usable controls. On narrow screens, the same console UI renders directly without the room. Graphics initialization failure also offers that direct mode.
 
-Domain previews use five distinct, authored SVG game worlds and matching jackets. System utilities keep their consistent SVG icon family. The art styles and their production references are defined in [the rule set](../../docs/art-direction/RULES.md). The weak room poster gallery and floating sculptures have been removed. No photographic domain representations or commercial game covers remain in the active experience.
+Domain previews, jackets, physical cases and discs share the four supplied illustrations; CC keeps its authored SVG world. System utilities keep their consistent SVG icon family. The art styles and their production references are defined in [the rule set](../../docs/art-direction/RULES.md). The weak room poster gallery and floating sculptures have been removed. No photographic domain representations are used. Supplied fan art provenance is documented in [cover notes](public/console/covers/README.md).
 
 Retained asset credits:
 

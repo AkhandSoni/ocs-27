@@ -5,6 +5,10 @@ import { Monitor } from "lucide-react";
 import ConsoleShell from "./console/ConsoleShell";
 import ControllerControls from "./ControllerControls";
 import StaticScreen from "./console/StaticScreen";
+import DomainTransportScreen from "./console/DomainTransportScreen";
+import { DOMAINS, IDLE_DOMAIN_STATE, type DomainState } from "@/lib/domain-sequence";
+import type { DomainId } from "@/lib/recruitment";
+import "./room-interactions.css";
 import type { RoomController } from "@/lib/create-room";
 export default function Lounge() {
   const stage = useRef<HTMLDivElement>(null),
@@ -16,6 +20,11 @@ export default function Lounge() {
     [focused, setFocused] = useState(true),
     [powered, setPowered] = useState(true),
     [startupInProgress, setStartupInProgress] = useState(true);
+  const [domainState, setDomainState] = useState<DomainState>(IDLE_DOMAIN_STATE);
+  const [launchRequest, setLaunchRequest] = useState<{ id: DomainId | null; sequence: number }>();
+  const [actionError, setActionError] = useState("");
+  const transport = !["idle", "active"].includes(domainState.phase);
+  const previousPhase = useRef("idle");
   useEffect(() => {
     const media = matchMedia("(max-width:680px)");
     const change = () => setFlat(media.matches);
@@ -29,6 +38,9 @@ export default function Lounge() {
       created: RoomController | undefined;
     setReady(false);
     setError("");
+    setDomainState(IDLE_DOMAIN_STATE);
+    previousPhase.current = "idle";
+    setLaunchRequest(undefined);
     const screen = document.createElement("div");
     screen.className = "tv-screen-host";
     setHost(screen);
@@ -48,7 +60,9 @@ export default function Lounge() {
           onAssetError(message) {
             console.warn(message);
           },
+          onDomainState(state) { if (!cancelled) setDomainState(state); },
           onConsolePower() {
+            if (cancelled) return;
             setStartupInProgress(true);
             setPowered((value) => !value);
           },
@@ -57,6 +71,7 @@ export default function Lounge() {
         else {
           controller.current = created;
           created.setFocus(true);
+          setFocused(true);
         }
       })
       .catch((e) => {
@@ -71,10 +86,32 @@ export default function Lounge() {
       controller.current = null;
     };
   }, [flat]);
+  useEffect(() => {
+    controller.current?.setInteractive(powered && !startupInProgress);
+  }, [powered, startupInProgress, ready]);
+  useEffect(() => {
+    const before = previousPhase.current;
+    previousPhase.current = domainState.phase;
+    if (domainState.phase === "active" && domainState.selected !== null) {
+      const id = DOMAINS[domainState.selected].id;
+      setLaunchRequest({ id: id === "competitive-coding" ? "cc" : id, sequence: Date.now() });
+
+    } else if (domainState.phase === "choosing") {
+      controller.current?.focusDomainCase();
+    } else if (domainState.phase === "idle" && before !== "idle") {
+      setLaunchRequest({ id: null, sequence: Date.now() });
+    }
+  }, [domainState]);
   const accent = useCallback(
     (color: string) => controller.current?.setAccent(color),
     [],
   );
+  const launchDomain = useCallback((id: DomainId) => {
+    const index = DOMAINS.findIndex(domain => domain.id === (id === "cc" ? "competitive-coding" : id));
+    if (!controller.current?.launchDomain(index)) setActionError("Disc drive is still loading. Try again in a moment.");
+    else setActionError("");
+    return true;
+  }, []);
   const powerOff = useCallback(() => {
     setStartupInProgress(true);
     setPowered(false);
@@ -99,7 +136,7 @@ export default function Lounge() {
   }, [focused]);
   return (
     <main
-      className={`console-room ${ready ? "is-ready" : ""} ${flat ? "flat-mode" : ""}`}
+      className={`console-room ${focused ? "focus-mode" : "room-mode"} ${ready ? "is-ready" : ""} ${flat ? "flat-mode" : ""}`}
       aria-label="ACM VIT gaming console environment"
     >
       <div className="room-stage" ref={stage} />
@@ -122,7 +159,12 @@ export default function Lounge() {
         host &&
         createPortal(
           powered ? (
+            <>
+            <div className="base-console-screen" hidden={transport} inert={transport}>
             <ConsoleShell
+              onLaunchDomain={launchDomain}
+              suspended={transport}
+              launchRequest={launchRequest}
               ready={ready}
               onAccent={accent}
               onRoom={toggleRoom}
@@ -130,6 +172,9 @@ export default function Lounge() {
               onStartupChange={setStartupInProgress}
               startAtStartup={startupInProgress}
             />
+            </div>
+            {transport && <DomainTransportScreen state={domainState} />}
+            </>
           ) : (
             <StaticScreen onPower={powerOn} />
           ),
@@ -151,12 +196,20 @@ export default function Lounge() {
           )}
         </div>
       )}
+      {actionError && <p className="room-action-error" role="status">{actionError}</p>}
       {powered && <ControllerControls visible={!startupInProgress} />}
       {!flat && ready && (
-        <button className="room-view-toggle" onClick={toggleRoom}>
+        <div className="room-actions">
+        <button className="room-view-toggle" onClick={toggleRoom} disabled={transport}>
           <Monitor size={15} />
           {focused ? "Room view" : "Focus console"}
         </button>
+        {powered && !startupInProgress && ["idle", "active"].includes(domainState.phase) && <button onClick={() => {
+          if (!controller.current?.openDomainLibrary()) setActionError("Disc drive is still loading. Try again in a moment.");
+          else setActionError("");
+        }}>Domain discs</button>}
+        {powered && domainState.phase !== "idle" && <button onClick={() => controller.current?.exitDomain()}>{domainState.phase === "active" ? "Eject disc" : "Cancel disc"}</button>}
+        </div>
       )}
     </main>
   );

@@ -40,7 +40,13 @@ export default function ConsoleShell({
   onPowerOff,
   onStartupChange,
   startAtStartup,
+  suspended = false,
+  launchRequest,
+  onLaunchDomain,
 }: {
+  onLaunchDomain?: (id: DomainId) => boolean;
+  suspended?: boolean;
+  launchRequest?: { id: DomainId | null; sequence: number };
   ready: boolean;
   onAccent: (color: string) => void;
   onRoom: () => void;
@@ -123,6 +129,7 @@ export default function ConsoleShell({
   }, [boot, startup, onStartupChange]);
   function launch(id: ExperienceId = selected) {
     setSelected(id);
+    if (isDomain(id) && onLaunchDomain?.(id)) return;
     if (["showcase", "arcade", "applications"].includes(id))
       setRoute({ screen: id as "showcase" | "arcade" | "applications" });
     else setRoute({ screen: "domain", id: id as DomainId });
@@ -132,6 +139,12 @@ export default function ConsoleShell({
     setRoute({ screen: "home" });
     root.current?.focus({ preventScroll: true });
   }
+  useLayoutEffect(() => {
+    if (!launchRequest) return;
+    setPanel(null);
+    if (launchRequest.id) { setSelected(launchRequest.id); setRoute({ screen: "domain", id: launchRequest.id }); }
+    else setRoute({ screen: "home" });
+  }, [launchRequest]);
   function back() {
     if (panel) {
       setPanel(null);
@@ -149,6 +162,7 @@ export default function ConsoleShell({
   }
   useLayoutEffect(() => {
     function control(e: Event) {
+      if (suspended) return;
       const action = (e as CustomEvent<ControllerAction>).detail;
       if (boot) {
         if (["confirm", "back", "home"].includes(action)) completeBoot();
@@ -246,7 +260,7 @@ export default function ConsoleShell({
     }
     window.addEventListener("ocs:controller-action", control);
     return () => window.removeEventListener("ocs:controller-action", control);
-  }, [route, selected, panel, boot, startup]);
+  }, [route, selected, panel, boot, startup, suspended, onLaunchDomain]);
   function authenticated(user: Student) {
     mergeGuest(user);
     setStudent(user);

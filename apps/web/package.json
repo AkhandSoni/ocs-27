@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "next build",
-    "start": "next start --hostname 0.0.0.0 --port 3000",
-    "test": "node --experimental-strip-types --test tests/auth.test.mjs tests/auth-routes.test.mjs tests/snake.test.mjs",
+    "dev": "pnpm build:art && next dev --hostname 0.0.0.0 --port 2027",
+    "build": "pnpm build:art && next build",
+    "start": "next start --hostname 0.0.0.0 --port 2027",
+    "test": "node --experimental-strip-types --test tests/auth.test.mjs tests/auth-routes.test.mjs tests/snake.test.mjs tests/controller-pickup.test.mjs tests/domain-sequence.test.mjs tests/domain-spatial.test.mjs tests/domain-library.test.mjs tests/domain-catalog.test.mjs",
     "typecheck": "tsc --noEmit",
     "optimize:models": "node scripts/optimize-models.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "build:art": "node scripts/build-domain-art.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -29,6 +30,7 @@
     "@types/three": "^0.180.0",
     "@webgpu/types": "^0.1.74",
     "meshoptimizer": "^0.24.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "jsdom": "26.1.0"
   }
 }

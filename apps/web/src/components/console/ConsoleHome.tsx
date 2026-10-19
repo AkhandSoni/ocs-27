@@ -108,16 +108,14 @@ export default function ConsoleHome({
             {domainById[selected].areas.join(" · ")}
           </p>
         )}
-        <button className="launch-button" onClick={() => onLaunch(selected)}>
+        {!isDomain(selected) && <button className="launch-button" onClick={() => onLaunch(selected)}>
           {selected === "arcade"
             ? "Start game"
             : selected === "showcase"
               ? "Open collection"
-              : selected === "applications"
-                ? "Open my console"
-                : "Enter domain"}
+              : "Open my console"}
           <ArrowRight size={22} />
-        </button>
+        </button>}
       </section>
       {!isDomain(selected) && <ExperiencePreview id={selected} />}
     </div>

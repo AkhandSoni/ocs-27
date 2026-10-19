@@ -8,9 +8,9 @@ The console is a stateful single-screen application. Domain exploration, applica
 | --- | --- |
 | `src/components/Lounge.tsx` | Original room lifecycle, React TV portal, focus/room camera, direct mobile mode |
 | `src/components/console/ConsoleShell.tsx` | Console routes, selection, session restore, directional input dispatch |
-| `BootScreen.tsx` | Original ACM startup; 3.2 seconds, skippable, session remembered |
-| `ConsoleHome.tsx`, `art/DomainArtwork.tsx`, `art/GameCover.tsx`, `game-identities.ts` | Cartridge rail, five original game worlds, cover crops and title identity |
-| `DomainExperience.tsx`, `content.ts` | Overview / responsibilities / selections; editable content separate from presentation |
+| `BootScreen.tsx` | Reference-timed ACM startup; 13.2 seconds, skippable, followed by player selection on every launch |
+| `ConsoleHome.tsx`, `art/DomainArtwork.tsx`, `art/GameCover.tsx`, `game-identities.ts` | Cartridge rail, shared supplied-art crops, retained CC vector world and title identity |
+| `DomainExperience.tsx`, `content.ts` | Overview / responsibilities / selections / example tools; editable content separate from presentation |
 | `ApplicationExperience.tsx`, `src/lib/recruitment.ts` | Six-step native HTML application, validation, review, consent, receipt |
 | `AuthPanel.tsx`, `SystemPanel.tsx` | Account forms, system drawer, focus trap, reset, logout, help |
 | `StudentExperience.tsx`, `useLibrary.ts` | Account-isolated local applications and high scores; storage failures and migration |
@@ -52,10 +52,10 @@ The room caps rendering at 30 fps and DPR 1.75. Hidden/offscreen rendering is su
 
 All interactive text, buttons and forms are DOM elements. Buttons have accessible names, focus is visible, form steps focus their headings, the system drawer traps Tab, and back behavior is contextual. Input fields keep native arrows, Backspace, Home and Enter behavior; Escape remains console back. The game supports pointer/touch swipes and explicit direction buttons. No sound is used.
 
-Retained model and texture licenses are in `public/models/ATTRIBUTION.txt` and `public/textures/walnut-source.txt`. Domain covers and backgrounds share authored SVG worlds; the redundant room poster gallery is removed. Project and event marks come from verified chapter repositories. See [inspection and verification notes](../../docs/console-rebuild.md).
+Retained model and texture licenses are in `public/models/ATTRIBUTION.txt` and `public/textures/walnut-source.txt`. Domain covers, backgrounds, physical cases and discs share their artwork; the redundant room poster gallery is removed. Project and event marks come from verified chapter repositories. See [inspection and verification notes](../../docs/console-rebuild.md).
 
 ## Game art implementation
 
-`art/TechWorld.tsx`, `ResearchWorld.tsx`, `ManagementWorld.tsx`, `DesignWorld.tsx` and `CodingWorld.tsx` implement independent scene grammars. `DomainArtwork` chooses the world and its cover crop; `GameCover` overlays the title as live HTML. Covers, selected backgrounds and domain hubs reuse these components. Forms keep only the domain accent so long answers remain readable.
+`DomainArtwork` and `CoverArtwork` render the four supplied PNG illustrations using the crop metadata in `domain-cover-art.ts`. `CodingWorld.tsx` retains CC’s authored vector scene. `GameCover` overlays titles as live HTML; `domain-package-art.ts` uses the same source/crop for cases and discs. Forms retain only the domain accent so long answers remain readable. Earlier vector world sources are recoverable in Git.
 
-The [study/rule set](../../docs/art-direction/RULES.md) was written before these assets. System icons no longer stand in for domain game art. No commercial game screenshots, characters or logos are shipped. Bebas Neue is bundled under its OFL license for the Tech identity; see `public/console/fonts/OFL.txt`.
+The [study/rule set](../../docs/art-direction/RULES.md) was written before these assets. System icons no longer stand in for domain game art. Four supplied fan-art covers contain third-party characters and titles; their original authors/licenses are unverified and documented with the uploads. Bebas Neue is bundled under its OFL license for the Tech identity; see `public/console/fonts/OFL.txt`.

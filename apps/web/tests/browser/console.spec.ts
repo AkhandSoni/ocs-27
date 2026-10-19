@@ -107,6 +107,7 @@ test("reference opening reaches player selection and accepts startup authenticat
 test("short skippable startup opens an original guest console and five domains", async ({
   page,
 }, info) => {
+  test.setTimeout(180000);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/?renderer=webgl");
   await expect(page.locator('[data-console-stage="boot"]')).toBeVisible();
@@ -153,10 +154,6 @@ test("short skippable startup opens an original guest console and five domains",
     await expect(
       page.getByRole("heading", { name, exact: true }),
     ).toBeVisible();
-    await page.screenshot({ path: info.outputPath(`world-${id}.png`) });
-    await cartridge
-      .locator(".game-cover")
-      .screenshot({ path: info.outputPath(`cover-${id}.png`) });
     await page.keyboard.press("Enter");
     await expect(
       page.getByRole("button", { name: "Begin application", exact: true }),
@@ -187,7 +184,7 @@ test("physical console powers off to TV static and the complete controller works
   await enter(page);
   await page.getByRole("button", { name: "Room view" }).click();
   await page.waitForTimeout(500);
-  await page.mouse.click(290, 540);
+  await page.getByRole("button", { name: "Console power", exact: true }).click();
   await expect(page.getByRole("heading", { name: "System off" })).toBeVisible();
   await expect(page.locator(".tv-static canvas")).toBeVisible();
   await page.getByRole("button", { name: "Power on" }).click();
@@ -570,7 +567,7 @@ test("WebGPU renders the retained room; mobile console stays usable", async ({
   ]) {
     await page.setViewportSize(viewport);
     await expect(
-      page.getByRole("button", { name: "Enter domain", exact: true }),
+      page.getByRole("button", { name: "Select TECH", exact: true }),
     ).toBeInViewport();
   }
   await page.setViewportSize({ width: 390, height: 844 });
@@ -631,4 +628,121 @@ test("unavailable browser storage reports failure without pretending to submit",
     page.getByText("Your submission could not be saved.", { exact: false }),
   ).toBeVisible();
   await expect(page.locator("[data-application-complete]")).toHaveCount(0);
+});
+
+
+test("focus enlarges the TV with the room behind it and keyboard feedback identifies the held controller key", async ({ page }, info) => {
+  await enter(page);
+  await expect(page.getByRole("button", { name: "Console power", exact: true })).toBeHidden();
+  await expect(page.locator(".physical-controller")).toBeHidden();
+  await expect(page.locator(".room-stage")).toHaveAttribute("data-room-visible", "true");
+  await page.getByRole("button", { name: "Controller", exact: true }).click();
+  await page.locator(".ocs-console").focus();
+  const mappings = [["ArrowRight", "right"], ["q", "l1"], ["e", "r1"], ["z", "l2"], ["c", "r2"]];
+  for (const [key, control] of mappings) {
+    await page.keyboard.down(key);
+    await expect(page.locator(`.virtual-controller .pad-${control}`)).toHaveAttribute("data-pressed", "true");
+    await expect(page.locator('.virtual-controller button[data-pressed="true"]')).toHaveCount(1);
+    await page.keyboard.up(key);
+    await expect(page.locator('.virtual-controller button[data-pressed="true"]')).toHaveCount(0);
+  }
+  await page.keyboard.down("ArrowLeft");
+  await page.screenshot({ path: info.outputPath("focus-key-feedback.png") });
+  await page.keyboard.up("ArrowLeft");
+  await page.getByRole("button", { name: "Close controller", exact: true }).click();
+  await page.getByRole("button", { name: "Room view", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Console power", exact: true })).toBeVisible();
+  await expect(page.locator(".physical-controller")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("room.png") });
+  await page.getByRole("button", { name: "Focus console", exact: true }).click();
+  await expect(page.locator(".physical-controller")).toBeHidden();
+  await page.screenshot({ path: info.outputPath("focus-tv.png") });
+});
+
+test("physical domain discs launch the real OCS experience and preserve contextual form back", async ({ page }, info) => {
+  await enter(page);
+  await page.getByRole("button", { name: "Domain discs", exact: true }).click();
+  const research = page.getByRole("button", { name: "Select Research case", exact: true });
+  await expect(research).toBeVisible();
+  await page.keyboard.press("ArrowRight");
+  await expect(research).toHaveAttribute("aria-pressed", "true");
+  await page.screenshot({ path: info.outputPath("domain-discs.png") });
+  await page.keyboard.press("Enter");
+  await expect(page.locator('.domain-app[data-domain="research"]')).toBeVisible();
+  await page.getByRole("button", { name: "Tools", exact: true }).click();
+  await expect(page.getByText("Jupyter", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Begin application", exact: true }).click();
+  await expect(page.locator('[data-console-screen="apply"]')).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator('[data-console-screen="domain"]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "Eject disc", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Eject disc", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Domain discs", exact: true })).toBeVisible();
+  await expect(page.locator("[data-console-home]")).toBeVisible();
+  // Loaded discs must not lock the camera or disable the room controls.
+  // The physical disc ID differs from the application ID for CC.
+  await page.getByRole("button", { name: "Domain discs", exact: true }).click();
+  const coding = page.getByRole("button", { name: "Select Competitive Coding case", exact: true });
+  await expect(coding).toBeVisible();
+  // Cases overlap physically. Click an actually exposed part of the cover,
+  // rather than the bounding-box center behind the foremost case.
+  const exposed = await coding.evaluate(button => {
+    const box = button.getBoundingClientRect();
+    for (const x of [.9, .8, .7, .95, .6, .5, .3, .1]) for (const y of [.5, .3, .7, .15, .85]) {
+      const target = document.elementFromPoint(box.x + box.width * x, box.y + box.height * y);
+      if (target?.closest("button") === button) return { x: box.width * x, y: box.height * y };
+    }
+    return null;
+  });
+  expect(exposed, "each fanned case has an exposed, clickable cover edge").not.toBeNull();
+  await coding.click({ position: exposed! });
+  await expect(coding).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(100);
+  await coding.click();
+  await expect(page.locator('.domain-app[data-domain="cc"]')).toBeVisible();
+  await page.getByRole("button", { name: "Room view", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Console power", exact: true })).toBeVisible();
+  await expect(page.locator(".physical-controller")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("room-with-loaded-disc.png") });
+  await page.getByRole("button", { name: "Focus console", exact: true }).click();
+  await page.keyboard.press("Home");
+  await page.evaluate(() => {
+    const phases: string[] = [];
+    const stage = document.querySelector(".room-stage")!;
+    new MutationObserver(records => records.forEach(record => {
+      if (record.oldValue) phases.push(record.oldValue);
+    })).observe(stage, { attributes: true, attributeFilter: ["data-domain-phase"], attributeOldValue: true });
+    Object.assign(window, { __discPhases: phases });
+  });
+  await choose(page, "DESIGN");
+  await expect(page.locator('.domain-app[data-domain="design"]')).toBeVisible();
+  const phases = await page.evaluate(() => (window as unknown as { __discPhases: string[] }).__discPhases);
+  expect(phases).toContain("returning");
+  expect(phases.indexOf("returning")).toBeLessThan(phases.lastIndexOf("opening"));
+  await page.getByRole("button", { name: "Room view", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Console power", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Console home", exact: true }).click();
+  await choose(page, "TECH");
+  await expect(page.locator('.domain-app[data-domain="tech"]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "Focus console", exact: true })).toBeVisible();
+  await expect(page.locator(".physical-controller")).toBeVisible();
+});
+
+
+test('domain tiles launch directly and clicking away dismisses the physical chooser', async ({ page }) => {
+  await enter(page);
+  await expect(page.getByRole("button", { name: "Enter domain", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Domain discs", exact: true }).click();
+  await expect(page.locator('.domain-case-target[aria-pressed="true"]')).toBeVisible();
+  const boxes = await page.locator('.domain-case-target').evaluateAll(nodes => nodes.map(node => {
+    const box = node.getBoundingClientRect(); return { x: box.x, y: box.y, width: box.width, height: box.height };
+  }));
+  const leftmost = boxes.sort((a, b) => a.x - b.x)[0];
+  await page.mouse.click(leftmost.x - 10, leftmost.y + leftmost.height / 2);
+  await expect(page.locator('.room-stage')).toHaveAttribute('data-domain-phase', 'choosing');
+  await page.mouse.click(25, 100);
+  await expect(page.locator('.room-stage')).toHaveAttribute('data-domain-phase', 'idle');
+  await expect(page.locator('[data-console-home]')).toBeVisible();
+  await choose(page, 'TECH');
+  await expect(page.locator('.domain-app[data-domain="tech"]')).toBeVisible();
 });

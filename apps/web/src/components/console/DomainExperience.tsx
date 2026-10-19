@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { domainById, domainInfo, experiences } from "./content";
 import type { DomainId } from "@/lib/recruitment";
+import { DOMAIN_CATALOG, toolLogo } from "@/lib/domain-catalog";
 import GameCover from "./art/GameCover";
 import DomainArtwork from "./art/DomainArtwork";
 import { gameIdentities } from "./game-identities";
@@ -19,12 +20,13 @@ export default function DomainExperience({
   submitted: boolean;
 }) {
   const [tab, setTab] = useState(0);
-  const labels = ["Overview", "Your role", "Selections"];
+  const labels = ["Overview", "Your role", "Selections", "Tools"];
+  const tools = DOMAIN_CATALOG[id === "cc" ? "competitive-coding" : id];
   const d = domainById[id],
     info = domainInfo[id];
   useExperienceInput((action) => {
     if (action === "left" || action === "right") {
-      setTab((x) => (x + (action === "right" ? 1 : -1) + 3) % 3);
+      setTab((x) => (x + (action === "right" ? 1 : -1) + labels.length) % labels.length);
       return true;
     }
     return false;
@@ -91,6 +93,15 @@ export default function DomainExperience({
             </ul>
           </>
         )}
+        {tab === 3 && <>
+          <h2>Explore the toolkit</h2>
+          <p className="system-note">Examples to explore, not prerequisites or a claim about the chapter’s production stack.</p>
+          <div className="domain-tools">{tools.disciplines.map(discipline => <div key={discipline.name}>
+            <strong>{discipline.name}</strong>{discipline.tools.map(tool => <span key={tool.name}>
+              {tool.logo && <img src={toolLogo(tool.logo)} alt="" width={22} height={22} />}{tool.name}
+            </span>)}
+          </div>)}</div>
+        </>}
         {tab === 2 && (
           <>
             <h2>Your next two steps.</h2>
