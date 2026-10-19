@@ -376,7 +376,7 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture, invali
   // A tiny sculptural tree balances the much larger foliage at the edges of the room.
   const bonsai = new THREE.Group();
   bonsai.name = 'Small olive tree';
-  bonsai.position.set(3.30, 1.45, -0.02);
+  bonsai.position.set(3.65, 1.45, -0.02);
   room.add(bonsai);
   const bonsaiCeramic = material('#b7aa8f', 0.91);
   cylinder(0.21, 0.16, 0.18, bonsaiCeramic, 0, 0.09, 0, bonsai, 32);

@@ -80,7 +80,7 @@ export function buildGameCollection(parent: THREE.Object3D, invalidate = () => {
     return root;
   }
   // Staggered jewel boxes, open blue edges and actual printed artwork on the top.
-  for (const [x, z, n, first] of [[-1.66, .12, 5, 2], [-1.82, -.27, 4, 5], [2.66, .11, 5, 8], [3.10, -.24, 4, 10]]) {
+  for (const [x, z, n, first] of [[-1.66, .12, 5, 2], [-1.82, -.27, 4, 5], [2.40, .11, 5, 8], [3.00, -.24, 4, 10]]) {
     for (let i = 0; i < n; i++) {
       const box = caseModel(first + i, i === n - 1);
       box.rotation.set(-Math.PI / 2, 0, Math.sin(i * 8 + x) * .045);
