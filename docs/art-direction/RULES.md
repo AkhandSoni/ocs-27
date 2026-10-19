@@ -39,7 +39,7 @@ References inform principles, not copied characters, logos, level layouts or scr
 5. **Content-safe composition.** Art focal area sits in the right half; left-side content uses a quiet opaque reading area / functional contrast mask. Controls never sit on busy artwork.
 6. **Artwork is editable SVG.** Named scene components, reusable geometric motifs, finite colour palettes. No image generation, photographs, stock art, copied game characters or embedded UI text.
 7. **Text remains HTML.** Titles, domain labels, buttons, statuses and form inputs remain selectable and accessible. Artwork contains no fake buttons or text.
-8. **Motion explains selection.** Selection uses a quick fade/translate and consistent outline. No drifting blobs, particles, spinning objects, bloom or continuous ambient effects. Honor reduced motion.
+8. **Motion explains selection.** Selection uses a quick fade/translate and consistent outline. No drifting blobs, particles, spinning objects, bloom or continuous ambient effects in Home or domain artwork. The user specifically requested the startup optical/particle sequence described in [the startup reference](../startup-reference.md); it stops at Home. Honor reduced motion.
 9. **System icons have a limited job.** Lucide is for system utilities and non-domain apps. It is not the game jacket or a domain’s main visual.
 10. **Forms are the console’s practical layer.** Carry only the domain accent into forms; remove scenic art behind long answers. Keep native inputs, persistence, auth and honest local receipts.
 11. **Keep the original engineering.** Retain the WebGPU/WebGL physical room and hardware. SVG artwork needs no second GPU context.

@@ -49,6 +49,7 @@ export default function Lounge() {
             console.warn(message);
           },
           onConsolePower() {
+            setStartupInProgress(true);
             setPowered((value) => !value);
           },
         });
@@ -77,6 +78,10 @@ export default function Lounge() {
   const powerOff = useCallback(() => {
     setStartupInProgress(true);
     setPowered(false);
+  }, []);
+  const powerOn = useCallback(() => {
+    setStartupInProgress(true);
+    setPowered(true);
   }, []);
   const toggleRoom = useCallback(
     () =>
@@ -126,7 +131,7 @@ export default function Lounge() {
               startAtStartup={startupInProgress}
             />
           ) : (
-            <StaticScreen onPower={() => setPowered(true)} />
+            <StaticScreen onPower={powerOn} />
           ),
           host,
         )}
@@ -142,7 +147,7 @@ export default function Lounge() {
               startAtStartup={startupInProgress}
             />
           ) : (
-            <StaticScreen onPower={() => setPowered(true)} />
+            <StaticScreen onPower={powerOn} />
           )}
         </div>
       )}

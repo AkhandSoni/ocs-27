@@ -70,6 +70,40 @@ async function register(page: Page, name = "Console Explorer") {
   return (await response.json()).user;
 }
 
+test("reference opening reaches player selection and accepts startup authentication", async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/?renderer=webgl");
+  await expect(page.locator('[data-console-stage="boot"]')).toBeVisible();
+  await expect(page.locator(".boot-emblem .acm-symbol")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("opening-logo.png") });
+  await expect.poll(() => page.locator(".boot-message").evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
+  await expect(page.locator(".boot-emblem")).toHaveCSS("opacity", "0");
+  await page.screenshot({ path: info.outputPath("opening-message.png") });
+  await page.waitForTimeout(2200);
+  await page.screenshot({ path: info.outputPath("opening-sweep.png") });
+  await expect(page.getByRole("heading", { name: "Welcome Back to ACM-VIT" })).toBeVisible();
+  await expect(page.locator(".console-surface")).toHaveCSS("opacity", "0");
+  await expect(page.getByRole("button", { name: "Continue as guest", exact: true })).toBeFocused();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: info.outputPath("opening-players.png") });
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.getByRole("button", { name: "Add user", exact: true })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("Email address", { exact: true })).toBeFocused();
+  await page.screenshot({ path: info.outputPath("opening-signin.png") });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Continue as guest", exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Add user", exact: true }).click();
+  await page.getByRole("button", { name: "New player? Create an account", exact: true }).click();
+  await page.getByLabel("Display name", { exact: true }).fill("Opening Explorer");
+  await page.getByLabel("Email address", { exact: true }).fill(`${randomUUID()}@prototype.test`);
+  await page.getByLabel("Password", { exact: true }).fill("console-prototype-password");
+  await page.getByRole("button", { name: "Create account", exact: true }).click();
+  await expect(page.locator(".startup-screen")).toHaveCount(0);
+  await expect(page.locator(".console-statusbar")).toContainText("LOCAL PLAYER");
+  await expect(page.locator(".console-surface")).toHaveCSS("opacity", "1");
+});
+
 test("short skippable startup opens an original guest console and five domains", async ({
   page,
 }, info) => {
@@ -78,7 +112,6 @@ test("short skippable startup opens an original guest console and five domains",
   await expect(page.locator('[data-console-stage="boot"]')).toBeVisible();
   await page.screenshot({
     path: info.outputPath("startup.png"),
-    animations: "disabled",
   });
   await page
     .getByRole("button", { name: /Skip startup/ })
@@ -86,13 +119,14 @@ test("short skippable startup opens an original guest console and five domains",
     .catch(() => {});
   await expect(page.locator(".startup-screen")).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Who’s using this console?" }),
+    page.getByRole("heading", { name: "Welcome Back to ACM-VIT" }),
   ).toBeVisible();
   await page.waitForTimeout(700);
   await page.screenshot({ path: info.outputPath("login.png") });
   await page
     .getByRole("button", { name: "Continue as guest", exact: true })
     .click();
+  await expect(page.locator(".startup-screen")).toHaveCount(0);
   await expect(page.locator("[data-console-home]")).toBeVisible();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".room-stage")).toHaveAttribute(

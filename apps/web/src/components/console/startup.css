@@ -1,0 +1,272 @@
+/* Timeline and composition measured from the user-supplied startup reference. */
+@font-face {
+  font-family: "OCS System";
+  src: url("/console/fonts/Lato-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+.console-chrome { font-family: "OCS System", "Helvetica Neue", Arial, sans-serif; }
+.console-chrome nav button { font-weight: 300; }
+.startup-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+.startup-atmosphere.is-active { opacity: 1; }
+.console-surface {
+  position: relative;
+  z-index: 1;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 650ms ease, transform 650ms var(--system-ease);
+}
+.console-surface.startup-concealed {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+.boot-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+.boot-emblem { animation: startup-logo-out 6.3s ease both; }
+.boot-emblem > .acm-symbol { display: block; width: 132px; height: 132px; }
+.boot-message {
+  position: absolute;
+  top: 46%;
+  left: 16%;
+  right: 16%;
+  opacity: 0;
+  color: #c7c9cb;
+  font-size: 11px;
+  line-height: 1.6;
+  text-transform: uppercase;
+  animation: startup-message 13.2s linear both;
+}
+.boot-message p { margin: 0; }
+.boot-screen > button {
+  position: absolute;
+  bottom: 32px;
+  right: 45px;
+  padding: 6px;
+  font-size: 11px;
+  color: #9a9ca4;
+  opacity: 0.65;
+}
+.boot-screen > button:hover, .boot-screen > button:focus-visible { opacity: 1; }
+.boot-screen kbd {
+  margin-left: 9px;
+  padding: 3px 6px;
+  border: 1px solid #ffffff35;
+  font: 9px Arial, sans-serif;
+}
+.startup-screen, .startup-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  color: #eeeef3;
+  font-family: "OCS System", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  font-weight: 300;
+}
+.startup-loading { display: grid; place-items: center; font-size: 14px; }
+.startup-time {
+  position: absolute;
+  top: 34px;
+  right: 54px;
+  font-size: 21px;
+  letter-spacing: -0.4px;
+  animation: startup-fade 700ms 650ms both;
+}
+.startup-players { position: absolute; inset: 0; }
+.startup-heading {
+  position: absolute;
+  top: 102px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  animation: startup-content-in 750ms ease both;
+}
+.startup-heading h1 {
+  margin: 0;
+  font-weight: 300;
+  font-size: 35px;
+  letter-spacing: -0.6px;
+}
+.startup-heading p {
+  margin: 18px 0 0;
+  color: #b3b1bc;
+  font-size: 20px;
+  letter-spacing: -0.1px;
+}
+.startup-profiles {
+  --player-avatar: 184px;
+  --add-avatar: 144px;
+  position: absolute;
+  top: 270px;
+  left: 50%;
+  width: 708px;
+  margin-left: -354px;
+  display: grid;
+  grid-template-columns: repeat(3, 236px);
+  align-items: start;
+  animation: startup-content-in 850ms 250ms ease both;
+}
+.startup-profile {
+  position: relative;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 0;
+  color: #c7c5cf !important;
+  font-size: 20px !important;
+  font-weight: 300;
+}
+.ocs-console .startup-profile:focus-visible { outline: none; }
+.startup-avatar {
+  position: relative;
+  display: grid;
+  width: var(--player-avatar);
+  height: var(--player-avatar);
+  place-items: center;
+  border-radius: 50%;
+  color: #eeeef4;
+  font-size: 64px;
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+.startup-avatar-guest {
+  background: linear-gradient(145deg, #426787, #263d59 55%, #18253b);
+  box-shadow: inset 0 0 0 1px #ffffff28;
+}
+.startup-avatar > .acm-symbol { width: 58%; height: 58%; opacity: 0.95; }
+.startup-avatar-add {
+  width: var(--add-avatar);
+  height: var(--add-avatar);
+  margin: calc((var(--player-avatar) - var(--add-avatar)) / 2) 0;
+  background: #ffffff0c;
+}
+.startup-avatar-add > svg { width: 47px; height: 47px; stroke-width: 2; }
+.startup-avatar::after {
+  position: absolute;
+  inset: -5px;
+  content: "";
+  border-radius: inherit;
+  border: 2px solid transparent;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+.startup-profile:hover .startup-avatar::after,
+.startup-profile:focus-visible .startup-avatar::after {
+  border-color: #eeedf6a0;
+  box-shadow: 0 0 0 2px #eeedf611;
+}
+.startup-controller-indicator {
+  position: absolute;
+  top: -49px;
+  left: calc(50% - 14px);
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.startup-controller-indicator small { font-size: 10px; }
+.startup-controller-indicator svg { width: 28px; height: 23px; fill: #c7c5cf; stroke-width: 1; }
+.startup-profile:hover .startup-controller-indicator,
+.startup-profile:focus-visible .startup-controller-indicator { opacity: 1; }
+.startup-account-options {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: 7px;
+  margin-top: 12px;
+  font-size: 15px;
+  color: #e4e2ed !important;
+}
+.startup-footer {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 21px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: startup-fade 800ms 450ms both;
+}
+.startup-footer > .acm-brand { width: 110px; height: auto; opacity: 0.6; }
+.startup-power {
+  position: absolute;
+  left: calc(50% - 24px);
+  top: 0;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff0b !important;
+}
+.startup-power:hover { background: #ffffff18 !important; }
+.startup-select-hint { display: flex; align-items: center; gap: 5px; font-size: 15px; }
+.startup-select-hint > span { display: grid; place-items: center; width: 21px; height: 21px; border-radius: 50%; background: #e3e1ebaa; color: #3d3b46; font-size: 22px; }
+.startup-signin > .startup-time { display: none; }
+.startup-auth-content { position: absolute; inset: 0; animation: startup-content-in 450ms ease both; }
+.startup-back { position: absolute; top: 42px; left: 52px; display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.startup-auth-brand { position: absolute; top: 38px; right: 52px; }
+.startup-auth-brand .acm-brand { width: 122px; height: auto; }
+.startup-auth-panel { position: absolute; top: 50%; left: 18%; width: 470px; max-height: 82%; overflow-y: auto; transform: translateY(-50%); padding: 34px 42px; background: #22212c; }
+.startup-auth-panel .auth-native > h2 { font-size: 32px; font-weight: 300; }
+.startup-auth-panel .auth-native > p { color: #c4c1cc; line-height: 1.6; }
+.startup-screen .auth-native .console-field { margin: 18px 0; }
+.startup-screen .auth-native .quiet-button { margin-top: 18px; }
+.startup-guest-button { width: 100%; min-height: 44px; margin-top: 14px; border: 1px solid #ffffff2c !important; font-size: 13px; }
+.startup-guest-button:hover { background: #ffffff0b; }
+.startup-error { position: absolute; left: 52px; bottom: 70px; margin: 0; color: #f2c6c2; font-size: 13px; }
+.startup-screen.startup-departing { pointer-events: none; animation: startup-departure 650ms ease both; }
+
+@keyframes startup-logo-out { 0%, 84% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes startup-message { 0%, 48% { opacity: 0; } 53%, 64% { opacity: 1; } 70%, 100% { opacity: 0; } }
+@keyframes startup-content-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes startup-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes startup-departure { to { opacity: 0; transform: scale(1.025); } }
+
+@media (max-width: 680px) {
+  .boot-emblem > .acm-symbol { width: 108px; height: 108px; }
+  .boot-message { font-size: 9px; left: 12%; right: 12%; }
+  .boot-screen > button { right: 20px; bottom: 22px; }
+  .startup-time { top: 23px; right: 22px; font-size: 16px; }
+  .startup-heading { top: 16%; padding: 0 18px; }
+  .startup-heading h1 { font-size: 25px; }
+  .startup-heading p { margin-top: 14px; font-size: 16px; }
+  .startup-profiles { --player-avatar: clamp(108px, 32vw, 128px); --add-avatar: clamp(76px, 22vw, 88px); width: 100%; top: 39%; left: 0; margin-left: 0; grid-template-columns: repeat(3, 1fr); }
+  .startup-profile { font-size: 16px !important; gap: 18px; }
+  .startup-controller-indicator { top: -38px; }
+  .startup-controller-indicator svg { width: 23px; height: 19px; }
+  .startup-avatar { font-size: 40px; }
+  .startup-avatar-add > svg { width: 34px; height: 34px; }
+  .startup-account-options { font-size: 12px; margin-top: 10px; }
+  .startup-footer { left: 20px; right: 20px; bottom: 22px; }
+  .startup-footer > .acm-brand { width: 83px; }
+  .startup-select-hint { font-size: 12px; }
+  .startup-select-hint > span { width: 18px; height: 18px; font-size: 19px; }
+  .startup-auth-panel { left: 5%; width: 90%; max-height: 78%; padding: 24px; }
+  .startup-auth-panel .auth-native > h2 { font-size: 26px; }
+  .startup-back { top: 22px; left: 20px; font-size: 12px; }
+  .startup-auth-brand { top: 21px; right: 20px; }
+  .startup-auth-brand .acm-brand { width: 82px; }
+  .startup-error { left: 20px; right: 20px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-message { display: none; }
+  .startup-screen.startup-departing { opacity: 0; }
+}

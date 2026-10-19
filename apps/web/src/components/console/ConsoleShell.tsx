@@ -23,9 +23,11 @@ import ArcadeExperience from "./ArcadeExperience";
 import StudentExperience from "./StudentExperience";
 import SystemPanel from "./SystemPanel";
 import StartupScreen from "./StartupScreen";
+import StartupAtmosphere from "./StartupAtmosphere";
 import { gameIdentities, isDomain } from "./game-identities";
 import "./console.css";
 import "./game-art.css";
+import "./startup.css";
 
 type Route =
   | { screen: "home" }
@@ -148,7 +150,10 @@ export default function ConsoleShell({
   useLayoutEffect(() => {
     function control(e: Event) {
       const action = (e as CustomEvent<ControllerAction>).detail;
-      if (boot) return;
+      if (boot) {
+        if (["confirm", "back", "home"].includes(action)) completeBoot();
+        return;
+      }
       if (startup) {
         childInput.current?.(action);
         return;
@@ -272,6 +277,7 @@ export default function ConsoleShell({
         style={{ "--selection": selectionColor } as React.CSSProperties}
         aria-label="ACM VIT OCS gaming console"
       >
+        {ready && <StartupAtmosphere boot={boot} active={boot || startup} />}
         {boot ? (
           <>
             {ready ? (
@@ -283,7 +289,7 @@ export default function ConsoleShell({
         ) : (
           <>
             <div
-              className="console-surface"
+              className={`console-surface ${startup ? "startup-concealed" : ""}`}
               inert={panel !== null || startup}
               aria-hidden={panel !== null || startup ? true : undefined}
             >
@@ -454,7 +460,7 @@ export default function ConsoleShell({
                 </span>
               </footer>
             </div>
-            {sessionError && (
+            {sessionError && !startup && (
               <button
                 className="session-warning"
                 onClick={() => {
@@ -495,6 +501,7 @@ export default function ConsoleShell({
                   sessionError={sessionError}
                   onAuthenticate={authenticated}
                   onContinue={() => setStartup(false)}
+                  onPowerOff={onPowerOff}
                 />
               ) : (
                 <div className="startup-loading" role="status">
