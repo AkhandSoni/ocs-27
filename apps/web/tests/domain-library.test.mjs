@@ -31,14 +31,15 @@ function setup() {
   device.add(body); device.position.set(-3.65, 2.16, -.05); scene.add(device);
   const shelf = container.querySelector('.domain-shelf-target');
   const choices = [...container.querySelectorAll('.domain-case-target')];
-  const insert = container.querySelector('.domain-insert-action');
+  const labels = [...container.querySelectorAll('.domain-label')];
   function advance(seconds, reduced = false) {
     for (let t = 0; t < seconds; t += 1 / 120) library.advance(1 / 120, reduced);
     library.draw(1440, 900, 8.3);
   }
   function choose(index) {
     if (state.phase !== 'choosing') { choices[index].click(); return; }
-    choices[index].click(); advance(.65); insert.click();
+    if (choices[index].getAttribute('aria-pressed') !== 'true') { choices[index].click(); advance(.65); }
+    choices[index].click();
   }
   function cleanup() {
     library.dispose();
@@ -50,7 +51,7 @@ function setup() {
     dom.window.close();
     globalThis.document = previousDocument;
   }
-  return { dom, scene, camera, container, library, device, shelf, stickyNote, choices, insert, choose, advance, cleanup, state: () => state };
+  return { dom, scene, camera, container, library, device, shelf, stickyNote, choices, labels, choose, advance, cleanup, state: () => state };
 }
 
 test('Domains note is labelled, lifts on collection hover, and settles when the selector opens', () => {
@@ -92,6 +93,7 @@ test('shelf clicks are gated on the device, expose five native buttons, and igno
     f.library.focusChoice(); assert.equal(document.activeElement, f.choices[0]);
     f.choices[0].dispatchEvent(new f.dom.window.KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
     assert.equal(document.activeElement, f.choices[4]);
+    f.advance(.65);
     f.choose(4); f.choose(2);
     assert.equal(f.state().selected, 4); assert.equal(f.state().phase, 'opening');
     assert.ok(f.choices.every(button => button.hidden));
@@ -127,17 +129,22 @@ test('clicking a fanned case brings it forward without inserting its disc', () =
     f.choices[4].click();
     assert.equal(f.state().phase, 'choosing');
     assert.equal(f.state().selected, null);
-    assert.equal(f.insert.disabled, true);
+    assert.equal(f.container.querySelector('.domain-insert-action'), null);
+    f.choices[4].click();
+    assert.equal(f.state().phase, 'choosing', 'second click while moving cannot insert');
     f.advance(.25);
     assert.ok(management.position.distanceTo(before) > .01, 'case glides from its previous fan position');
     f.advance(.4);
     assert.ok(management.position.z > tech.position.z, 'selected case is physically in front');
     assert.equal(f.choices[4].getAttribute('aria-pressed'), 'true');
     assert.ok(f.choices[4].style.clipPath.startsWith('polygon('));
-    assert.equal(f.insert.textContent, 'Insert Management disc');
-    f.insert.click();
+    assert.equal(f.labels[4].getAttribute('aria-pressed'), 'true');
+    assert.equal(f.labels[4].textContent, '05Management');
+    f.choices[4].click();
     assert.equal(f.state().selected, 4);
     assert.equal(f.state().phase, 'opening');
+    f.advance(.02);
+    assert.equal(f.scene.getObjectByName('Printed domain disc label').material.map.image.dataset.domain, 'management');
   } finally { f.cleanup(); }
 });
 
@@ -153,6 +160,21 @@ test('reduced motion settles every case before the portrait camera focuses the T
     assert.equal(f.scene.getObjectByName('Removable domain disc').visible, false);
     f.advance(2, true); assert.equal(f.state().phase, 'active');
     f.library.exit(); f.advance(.02, true); assert.equal(f.state().phase, 'idle'); assert.equal(f.library.zoom, 0);
+  } finally { f.cleanup(); }
+});
+
+test('the vertical names select the matching case and a second activation inserts it', () => {
+  const f = setup();
+  try {
+    f.library.setDevice(f.device); f.shelf.click(); f.advance(2);
+    assert.deepEqual(f.labels.map(label => label.querySelector('strong').textContent), ['Tech', 'Research', 'Competitive Coding', 'Design', 'Management']);
+    assert.equal(f.container.querySelector('.domain-labels').hidden, false);
+    f.labels[3].click();
+    assert.equal(f.state().selected, null);
+    f.advance(.65); f.labels[3].click(); f.advance(.02);
+    assert.equal(f.state().selected, 3);
+    assert.equal(f.container.querySelector('.domain-labels').hidden, true);
+    assert.equal(f.scene.getObjectByName('Printed domain disc label').material.map.image.dataset.domain, 'design');
   } finally { f.cleanup(); }
 });
 

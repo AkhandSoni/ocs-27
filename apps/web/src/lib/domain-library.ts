@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { CaseMotion, DiscMotion, DISC_RADIUS, makeCaseLayout } from "./domain-spatial.ts";
 import { CUES, DOMAINS, DomainSequence, sampleLoad, type DomainState } from "./domain-sequence.ts";
-import { domainCover } from "./domain-catalog.ts";
+import { paintPackage } from "./domain-package-art.ts";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { COLLECTION_BOUNDS } from "./game-collection.ts";
 import { GAME_CASE, GAME_CASE_SHELL } from "./game-case.ts";
 
@@ -11,13 +12,12 @@ type Domain = typeof DOMAINS[number];
 export function createDomainLibrary(scene: THREE.Scene, camera: THREE.PerspectiveCamera, container: HTMLElement, onState: (state: DomainState) => void, stickyNote?: THREE.Object3D) {
   const sequence = new DomainSequence();
   let disposed = false;
-  const coverImages: HTMLImageElement[] = [];
   const group = new THREE.Group();
   group.name = "ACM domain disc library";
   scene.add(group);
-  const blue = new THREE.MeshStandardMaterial(GAME_CASE_SHELL);
+  const blue = new THREE.MeshPhysicalMaterial({ ...GAME_CASE_SHELL, roughness: .24, clearcoat: .8, clearcoatRoughness: .18 });
   const tray = new THREE.MeshStandardMaterial({ color: "#102439", roughness: .57 });
-  const panelGeometry = new THREE.BoxGeometry(GAME_CASE.width, GAME_CASE.height, .012);
+  const panelGeometry = new RoundedBoxGeometry(GAME_CASE.width, GAME_CASE.height, .012, 2, .004);
   const coverGeometry = new THREE.PlaneGeometry(GAME_CASE.width - .025, GAME_CASE.height - .025);
   const cases = DOMAINS.map((domain, index) => {
     const root = new THREE.Group();
@@ -47,24 +47,22 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     const lid = new THREE.Mesh(panelGeometry, blue);
     lid.position.x = GAME_CASE.width / 2 - .006;
     hinge.add(lid);
-    const coverCanvas = paintCover(domain, index);
+    const coverCanvas = paintPackage(index);
     const coverMap = texture(coverCanvas);
-    const cover = new THREE.Mesh(coverGeometry, new THREE.MeshStandardMaterial({ map: coverMap, roughness: .38, metalness: 0 }));
-    const coverImage = document.createElement("img");
-    coverImage.decoding = "async";
-    coverImage.onload = () => {
-      if (disposed) return;
-      paintCover(domain, index, coverCanvas, coverImage);
-      coverMap.needsUpdate = true;
-    };
-    coverImage.src = domainCover(domain.id);
-    coverImages.push(coverImage);
+    const cover = new THREE.Mesh(coverGeometry, new THREE.MeshPhysicalMaterial({ map: coverMap, roughness: .3, clearcoat: .65, clearcoatRoughness: .24, emissiveMap: coverMap, emissive: "#ffffff", emissiveIntensity: .13 }));
     cover.position.set(GAME_CASE.width / 2 - .006, 0, .0065);
     hinge.add(cover);
     const inside = new THREE.Mesh(coverGeometry, tray);
     inside.rotation.y = Math.PI;
     inside.position.set(GAME_CASE.width / 2 - .006, 0, -.0065);
     hinge.add(inside);
+    // Molded retaining clips and hinge barrels stay within the shared shell.
+    for (const y of [-.24, .24]) {
+      const clip = new THREE.Mesh(new THREE.BoxGeometry(.035, .02, .012), blue);
+      clip.position.set(GAME_CASE.width / 2 - .012, y, -.015); hinge.add(clip);
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .085, 10), blue);
+      barrel.position.set(-GAME_CASE.width / 2 + .008, y, 0); root.add(barrel);
+    }
     root.add(hinge);
     root.traverse(object => { if (object instanceof THREE.Mesh) { object.castShadow = true; object.receiveShadow = true; } });
     group.add(root);
@@ -72,6 +70,11 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
   });
 
   const disc = makeDisc();
+  const discMaps = DOMAINS.map((_, index) => texture(paintPackage(index, true)));
+  const printedDisc = new THREE.Mesh(new THREE.RingGeometry(.027, DISC_RADIUS - .005, 80), new THREE.MeshPhysicalMaterial({ map: discMaps[0], roughness: .36, metalness: .08, clearcoat: .55, side: THREE.FrontSide }));
+  printedDisc.name = "Printed domain disc label";
+  printedDisc.position.z = .0015; disc.add(printedDisc);
+  let printedIndex = 0;
   disc.visible = false;
   group.add(disc);
   const discMotion = new DiscMotion(disc);
@@ -113,7 +116,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     const caption = document.createElement("span");
     caption.textContent = domain.name;
     button.appendChild(caption);
-    button.onclick = () => preview(i);
+    button.onclick = () => activate(i);
     button.onkeydown = event => {
       const next = event.key === "ArrowRight" ? (i + 1) % buttons.length : event.key === "ArrowLeft" ? (i + buttons.length - 1) % buttons.length : event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : -1;
       if (next >= 0) { event.preventDefault(); preview(next); buttons[next].focus({ preventScroll: true }); }
@@ -121,16 +124,27 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     overlay.appendChild(button);
     return button;
   });
-  const insert = document.createElement("button");
-  insert.type = "button";
-  insert.className = "domain-insert-action";
-  insert.hidden = true;
-  insert.textContent = `Insert ${DOMAINS[0].name} disc`;
-  insert.onclick = () => {
+  const labels = document.createElement("div");
+  labels.className = "domain-labels"; labels.hidden = true;
+  labels.setAttribute("aria-label", "Domains");
+  const labelButtons = DOMAINS.map((domain, i) => {
+    const label = document.createElement("button");
+    label.type = "button"; label.className = "domain-label";
+    label.setAttribute("aria-label", `Choose ${domain.name}`);
+    label.setAttribute("aria-pressed", String(i === previewIndex));
+    label.style.setProperty("--domain-ink", domain.color);
+    const number = document.createElement("span"); number.textContent = String(i + 1).padStart(2, "0");
+    const name = document.createElement("strong"); name.textContent = domain.name;
+    label.append(number, name); label.onclick = () => activate(i);
+    labels.appendChild(label); return label;
+  });
+  overlay.appendChild(labels);
+  function activate(index: number) {
+    if (sequence.state.phase !== "choosing") return;
+    if (index !== previewIndex) { preview(index); return; }
     if (fanProgress < 1) return;
-    if (sequence.select(previewIndex)) publish();
-  };
-  overlay.appendChild(insert);
+    if (sequence.select(index)) publish();
+  }
   function preview(index: number) {
     if (sequence.state.phase !== "choosing" || index === previewIndex) return;
     fromPositions = layout.positions.map(position => position.clone());
@@ -139,8 +153,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     targetLayout = makeCaseLayout(lastView.z, lastView.aspect, lastView.fov, previewIndex);
     fanProgress = 0;
     buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === previewIndex)));
-    insert.textContent = `Insert ${DOMAINS[previewIndex].name} disc`;
-    insert.disabled = true;
+    labelButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === previewIndex)));
     container.dataset.domainPreview = DOMAINS[previewIndex].id;
   }
   container.appendChild(overlay);
@@ -169,11 +182,11 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     shelf.hidden = next.phase !== "idle";
     shelf.setAttribute("aria-expanded", String(next.phase !== "idle"));
     buttons.forEach(button => { button.hidden = next.phase !== "choosing"; });
-    insert.hidden = next.phase !== "choosing";
+    labels.hidden = next.phase !== "choosing";
     if (next.phase === "idle") {
       previewIndex = 0; fanProgress = 1; layoutKey = "";
       buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
-      insert.textContent = `Insert ${DOMAINS[0].name} disc`;
+      labelButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
       delete container.dataset.domainPreview;
     } else if (next.phase === "choosing") container.dataset.domainPreview = DOMAINS[previewIndex].id;
     container.dataset.domainPhase = next.phase;
@@ -229,7 +242,6 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     advance(delta: number, reduced: boolean) {
       sequence.update(delta, { reduced });
       if (Number.isFinite(delta) && delta >= 0) fanProgress = reduced ? 1 : Math.min(1, fanProgress + Math.min(delta, .05) / .52);
-      insert.disabled = fanProgress < 1;
       if (stickyNote && noteRest && noteRotation) {
         const lift = sequence.state.phase === "idle" && (hovered || focused) ? 1 : 0;
         const ease = reduced ? 1 : 1 - Math.exp(-delta * 12);
@@ -260,6 +272,11 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
         if (fanProgress === 1) layout = targetLayout;
       }
       const selected = sequence.state.selected;
+      if (selected !== null && selected !== printedIndex) {
+        printedIndex = selected;
+        printedDisc.material.map = discMaps[selected];
+        printedDisc.material.needsUpdate = true;
+      }
       cases.forEach((item, index) => {
         item.motion.update(sequence.presentation, pose, selected, layout);
         item.hinge.rotation.y = selected === index ? -pose.lid * 2.4 : 0;
@@ -279,15 +296,11 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
           point.copy(cases[i].root.position).applyMatrix4(camera.matrixWorldInverse);
           button.style.zIndex = String(1000 + Math.round(point.z * 100));
         });
-        const front = project(buttons[previewIndex], caseBox, cases[previewIndex].root.matrixWorld, width, height, true);
-        insert.style.left = `${front.x}px`;
-        insert.style.top = `${Math.min(height - 52, front.bottom + 14)}px`;
       }
     },
     dispose() {
       disposed = true;
-      coverImages.forEach(image => { image.onload = null; image.removeAttribute("src"); });
-      coverImages.length = 0;
+      discMaps.forEach(map => map.dispose());
       document.removeEventListener("keydown", onKey, true);
       shelf.removeEventListener("pointerenter", enterShelf);
       shelf.removeEventListener("pointerleave", leaveShelf);
@@ -303,24 +316,6 @@ function texture(canvas: HTMLCanvasElement) {
   map.colorSpace = THREE.SRGBColorSpace;
   map.anisotropy = 4;
   return map;
-}
-
-function paintCover(domain: Domain, index: number, canvas = document.createElement("canvas"), image?: CanvasImageSource) {
-  canvas.width = 512; canvas.height = 640;
-  const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = "#111923"; ctx.fillRect(0, 0, 512, 640);
-  if (image) ctx.drawImage(image, 0, 0, 512, 640);
-  const gradient = ctx.createLinearGradient(0, 0, 0, 640);
-  gradient.addColorStop(0, "#050b2520"); gradient.addColorStop(.48, "#050b2500"); gradient.addColorStop(1, "#050b25f5");
-  ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 640);
-  ctx.fillStyle = "#ecece7"; ctx.fillRect(0, 0, 512, 60);
-  ctx.fillStyle = "#151c25"; ctx.font = "bold 35px Arial"; ctx.fillText("PS5", 25, 43);
-  ctx.fillStyle = domain.color; ctx.font = "500 21px Arial"; ctx.fillText(String(index + 1).padStart(2, "0"), 34, 413);
-  ctx.fillStyle = "#f1f3f5"; ctx.font = `700 ${domain.name === "Management" ? 49 : domain.lines.length > 1 ? 43 : 60}px Arial`;
-  domain.lines.forEach((line, i) => ctx.fillText(line, 32, 465 + i * 52));
-  ctx.fillStyle = "#b7c1cd"; ctx.font = "400 16px Arial"; ctx.fillText("THE DOMAIN COLLECTION", 34, 594);
-  ctx.fillStyle = domain.color; ctx.fillRect(32, 545, 448, 2);
-  return canvas;
 }
 
 function paintSpine(domain: Domain, index: number) {
