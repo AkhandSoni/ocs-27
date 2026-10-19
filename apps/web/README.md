@@ -32,6 +32,8 @@ Browse **Games** and **Media**, select games with the mouse or left/right arrows
 
 Click the DualSense on the cabinet to pick it up. It lifts along a curved path into a camera-relative first-person position, with a backward tilt, slight roll, and subtle hand sway. Click it again or press **Escape** to return it to its original position. The controller also has an invisible keyboard-focusable target: Tab to **Pick up controller** and press Enter or Space. Reduced-motion mode skips the flight and sway.
 
+The physical shelf has a larger collection with printed spines, staggered stacks, and outward-facing covers. Games and all five domain cases share the same dimensions and plastic finish in `src/lib/game-case.ts`. The handwritten yellow **Domains** sticky note lifts on hover; hovering any case shows the **Domains** title. Clicking the collection opens the five domain cases. The TV library contains 16 actual game titles with local artwork; it keeps only three recent hero backgrounds decoded for transitions.
+
 ## Rendering and assets
 
 Three.js uses WebGPU when available and falls back to WebGL 2. Open [the explicit WebGL fallback](http://localhost:2027/?renderer=webgl) to check it. The `.room-stage` element records the active backend in its `data-renderer` attribute and controller pose in `data-controller-state`. CSS3DRenderer aligns the interactive HTML TV interface with the same perspective camera as the 3D room. A depth-tested transparent TV aperture lets foreground geometry occlude that interface using the same GPU renderer.

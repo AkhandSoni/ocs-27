@@ -4,9 +4,9 @@
 .domain-interactions{position:absolute;inset:0;z-index:3;pointer-events:none}
 .domain-interactions button{position:absolute;left:0;top:0;pointer-events:auto;padding:0;border:0;border-radius:4px;background:transparent;color:#f1f4f8;touch-action:manipulation}
 .domain-interactions button[hidden]{display:none}.domain-interactions button:disabled{pointer-events:none}
-.domain-shelf-target>span{position:absolute;left:50%;top:0;transform:translate(-50%,-145%);white-space:nowrap;padding:5px 9px;border:1px solid #c4d2e41e;border-radius:5px;background:#0a1019c9;color:#cbd4df;font-size:10px;letter-spacing:.035em;opacity:.8;transition:opacity .2s}
-.domain-shelf-target:hover>span,.domain-shelf-target:focus-visible>span{opacity:1;border-color:#d5e7ff55}
-.domain-shelf-target:focus-visible{outline:1px solid #d6e7ff;outline-offset:4px;background:#a3caff0c}
+.domain-shelf-target .domain-shelf-caption{position:absolute;left:44%;top:-8px;transform:translate(-50%,4px);white-space:nowrap;padding:7px 13px;border:1px solid #e0d4a438;border-radius:5px;background:#141511ed;color:#f2e7c5;font-size:12px;letter-spacing:.04em;opacity:0;visibility:hidden;pointer-events:none;box-shadow:0 5px 18px #0003;transition:opacity .18s,transform .18s,visibility .18s}
+.domain-shelf-target:hover .domain-shelf-caption,.domain-shelf-target:focus-visible .domain-shelf-caption{opacity:1;visibility:visible;transform:translate(-50%,-5px)}
+.domain-shelf-target:focus-visible{outline:1px solid #e4d6a2;outline-offset:4px;background:#e4d6a207}
 .domain-case-target>span{position:absolute;top:calc(100% + 12px);left:50%;width:max-content;max-width:125px;transform:translateX(-50%);padding:5px 8px;color:#e9eef6;font-size:12px;line-height:1.35;font-weight:500;text-align:center;text-shadow:0 2px 5px #000;background:#07101bce;border-bottom:1px solid transparent;border-radius:3px;transition:color .2s,border-color .2s}
 .domain-case-target:hover>span,.domain-case-target:focus-visible>span{color:var(--case-accent);border-bottom-color:var(--case-accent)}
 .domain-case-target:focus-visible{outline:1px solid var(--case-accent);outline-offset:7px}

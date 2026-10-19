@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { DOMAIN_SHELF_INDICES, DOMAINS, smooth, type sampleLoad } from "./domain-sequence.ts";
+import { GAME_CASE, CASE_CENTER_Y } from "./game-case.ts";
 
-export const DISC_RADIUS = .143;
+export const DISC_RADIUS = .202;
 type LoadPose = ReturnType<typeof sampleLoad>;
 export type CaseLayout = ReturnType<typeof makeCaseLayout>;
 
@@ -40,7 +41,7 @@ export class CaseMotion {
   constructor(model: THREE.Object3D, index: number) {
     this.model = model;
     this.index = index;
-    this.restPosition = new THREE.Vector3(-.95 + DOMAIN_SHELF_INDICES[index] * .074, 1.6525, .13);
+    this.restPosition = new THREE.Vector3(-.95 + DOMAIN_SHELF_INDICES[index] * .074, CASE_CENTER_Y, GAME_CASE.centerZ);
   }
   update(presentation: number, pose: LoadPose, selected: number | null, layout: CaseLayout) {
     // Pull straight out of the tightly packed shelf before turning the case.

@@ -15,6 +15,9 @@ A first signed-out visit runs a 17.4-second code-rendered startup after the room
 | `src/components/GameScreen.tsx` | Games/Media home, search, library, details, launch screen, account menus |
 | `src/lib/create-room.ts` | WebGPU/WebGL renderer, shared camera, CSS3D TV, model loading, cleanup |
 | `src/lib/controller-pickup.ts` | Raycast picking, reversible pickup animation, camera-relative grip, keyboard access |
+| `src/lib/game-case.ts` | Shared physical dimensions and plastic finish for games and domain cases |
+| `src/lib/game-collection.ts` | Instanced printed game spines, stacks, real cover artwork, curled sticky note |
+| `src/lib/game-catalog.ts` | Sixteen real games shared by the TV library and physical collection |
 | `src/lib/room-objects.ts` | Procedural room, walnut furniture, plants, lights, photographic gallery |
 | `src/lib/auth.ts` | SQLite users/sessions, validation, password hashing, origin and cookie handling |
 | `src/app/api/auth/*/route.ts` | Local account HTTP endpoints |

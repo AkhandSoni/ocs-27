@@ -1,10 +1,11 @@
 import * as THREE from 'three';
-import { DOMAIN_SHELF_INDICES } from './domain-sequence';
+import { buildGameCollection } from './game-collection';
 
 type RoomObjects = {
   accentLights: THREE.PointLight[];
   warmLights: THREE.PointLight[];
   animatedObjects: THREE.Object3D[];
+  stickyNote: THREE.Object3D;
 };
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -461,48 +462,7 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
   ]);
   room.add(new THREE.Mesh(new THREE.TubeGeometry(cord, 18, 0.007, 4, false), softBlack));
 
-  // A shelf-like collection of blue PS5 cases fills the center of the cabinet.
-  const caseBlue = material('#1765af', 0.48);
-  const caseCount = 36;
-  const cases = new THREE.InstancedMesh(new THREE.BoxGeometry(0.066, 0.405, 0.34), caseBlue, caseCount - DOMAIN_SHELF_INDICES.length);
-  const spinePositions: number[] = [];
-  const spineUvs: number[] = [];
-  const spineIndices: number[] = [];
-  let shelfInstance = 0;
-  for (let i = 0; i < caseCount; i++) {
-    // These slots are occupied by the actual hinged domain cases.
-    if (DOMAIN_SHELF_INDICES.some(index => index === i)) continue;
-    const x = -0.95 + i * 0.074;
-    transform.position.set(x, 1.6525, 0.13);
-    transform.updateMatrix();
-    cases.setMatrixAt(shelfInstance++, transform.matrix);
-    const vertex = spinePositions.length / 3;
-    spinePositions.push(x - 0.028, 1.463, 0.302, x + 0.028, 1.463, 0.302,
-      x + 0.028, 1.842, 0.302, x - 0.028, 1.842, 0.302);
-    spineUvs.push(i / caseCount, 0, (i + 1) / caseCount, 0, (i + 1) / caseCount, 1, i / caseCount, 1);
-    spineIndices.push(vertex, vertex + 1, vertex + 2, vertex, vertex + 2, vertex + 3);
-  }
-  cases.castShadow = cases.receiveShadow = true;
-  cases.name = 'Blue PS5 game case collection';
-  room.add(cases);
-  const spineGeometry = new THREE.BufferGeometry();
-  spineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(spinePositions, 3));
-  spineGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(spineUvs, 2));
-  spineGeometry.setIndex(spineIndices);
-  spineGeometry.computeVertexNormals();
-  const spineTexture = new THREE.CanvasTexture(paintGameSpines(caseCount));
-  spineTexture.colorSpace = THREE.SRGBColorSpace;
-  spineTexture.anisotropy = 8;
-  const spines = new THREE.Mesh(spineGeometry, new THREE.MeshStandardMaterial({ map: spineTexture, roughness: 0.71 }));
-  room.add(spines);
-  for (const [x, z, count] of [[-1.59, 0.15, 4], [-1.73, -0.28, 3], [2.18, 0.15, 4], [2.55, -0.28, 3]]) {
-    for (let i = 0; i < count; i++) {
-      const offset = (i % 2) * 0.026;
-      box(0.55, 0.034, 0.34, caseBlue, x + offset, 1.468 + i * 0.036, z);
-      box(0.48, 0.020, 0.344, material(i % 2 ? '#bfc2ba' : '#d4d6cf', 0.92),
-        x + offset, 1.468 + i * 0.036, z + 0.002);
-    }
-  }
+  const { stickyNote } = buildGameCollection(room);
 
   // One compact hi-fi speaker, inset drivers and a few cloth-bound books.
   roundedBox(0.40, 0.54, 0.35, 0.025, material('#33352f', 0.88), -4.50, 1.88, -0.02);
@@ -523,7 +483,7 @@ export function buildRoom(scene: THREE.Scene, woodTexture: THREE.Texture): RoomO
     box(0.40, 0.035, 0.313, material('#cfc6b2', 0.99), -4.52, 1.48 + i * 0.058, -0.097);
   }
 
-  return { accentLights, warmLights, animatedObjects };
+  return { accentLights, warmLights, animatedObjects, stickyNote };
 }
 
 function seeded(seed: number) {
@@ -557,52 +517,6 @@ function makeLeafGeometry() {
   return geometry;
 }
 
-function paintGameSpines(count: number): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  const stripWidth = 64;
-  canvas.width = stripWidth * count;
-  canvas.height = 512;
-  const context = canvas.getContext('2d');
-  if (!context) return canvas;
-  const names = ['GOD OF WAR', 'THE LAST OF US', 'SPIDER-MAN', 'HORIZON', 'GHOST OF TSUSHIMA', 'ELDEN RING',
-    'GRAN TURISMO 7', 'UNCHARTED', 'RETURNAL', 'DEMON’S SOULS', 'RATCHET & CLANK', 'FINAL FANTASY XVI'];
-  const colors = ['#263e48', '#6c6847', '#a42c35', '#dca26f', '#e1dac5', '#5e5940', '#263f64', '#d7bd87', '#375b4f'];
-  for (let i = 0; i < count; i++) {
-    const x = i * stripWidth;
-    context.fillStyle = colors[i % colors.length];
-    context.fillRect(x, 0, stripWidth, 512);
-    const gradient = context.createLinearGradient(x, 0, x + stripWidth, 512);
-    gradient.addColorStop(0, 'rgba(255,255,255,0.14)');
-    gradient.addColorStop(0.55, 'rgba(0,0,0,0)');
-    gradient.addColorStop(1, 'rgba(0,0,0,0.46)');
-    context.fillStyle = gradient;
-    context.fillRect(x, 0, stripWidth, 512);
-    context.fillStyle = '#e9ecea';
-    context.fillRect(x, 0, stripWidth, 65);
-    context.fillStyle = '#162332';
-    context.font = 'bold 23px Arial, sans-serif';
-    context.textAlign = 'center';
-    context.fillText('PS5', x + 32, 43);
-    context.save();
-    context.beginPath();
-    context.rect(x + 4, 74, stripWidth - 8, 395);
-    context.clip();
-    context.translate(x + 38, 286);
-    context.rotate(-Math.PI / 2);
-    context.fillStyle = i % 4 === 3 ? '#20271f' : '#f0eee3';
-    context.font = 'bold 21px Arial, sans-serif';
-    context.fillText(names[i % names.length], 0, 0, 340);
-    context.restore();
-    context.fillStyle = '#e5e7e1';
-    context.fillRect(x + 18, 479, 28, 8);
-    context.fillStyle = '#1d64a2';
-    context.fillRect(x, 0, 4, 512);
-    context.fillRect(x + stripWidth - 4, 0, 4, 512);
-  }
-  return canvas;
-}
-
-/** Small original prints, deliberately quiet enough to sit beside a bright screen. */
 function paintArtwork(variation: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 512;

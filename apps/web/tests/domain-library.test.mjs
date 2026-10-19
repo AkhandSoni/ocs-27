@@ -1,3 +1,4 @@
+import { GAME_CASE, CASE_CENTER_Y } from "../src/lib/game-case.ts";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +24,8 @@ function setup() {
   camera.position.set(0, 3.66, 8.3); camera.lookAt(0, 3.65, -.3); camera.updateMatrixWorld();
   const container = document.getElementById('room');
   let state = { phase: 'idle', selected: null };
-  const library = createDomainLibrary(scene, camera, container, next => { state = next; });
+  const stickyNote = new THREE.Object3D(); stickyNote.position.set(.4, 1.83, .395);
+  const library = createDomainLibrary(scene, camera, container, next => { state = next; }, stickyNote);
   const device = new THREE.Group();
   const body = new THREE.Mesh(new THREE.BoxGeometry(.5, 1.4, .8), new THREE.MeshStandardMaterial());
   device.add(body); device.position.set(-3.65, 2.16, -.05); scene.add(device);
@@ -43,8 +45,37 @@ function setup() {
     dom.window.close();
     globalThis.document = previousDocument;
   }
-  return { dom, scene, camera, container, library, device, shelf, choices, advance, cleanup, state: () => state };
+  return { dom, scene, camera, container, library, device, shelf, stickyNote, choices, advance, cleanup, state: () => state };
 }
+
+test('Domains note is labelled, lifts on collection hover, and settles when the selector opens', () => {
+  const f = setup();
+  try {
+    f.library.setDevice(f.device);
+    assert.equal(f.shelf.textContent, 'Domains');
+    assert.ok(!f.shelf.textContent.includes('Explore'));
+    f.shelf.dispatchEvent(new f.dom.window.Event('pointerenter'));
+    f.advance(.5);
+    assert.ok(f.stickyNote.position.z > .42);
+    f.shelf.click(); f.advance(2);
+    assert.equal(f.state().phase, 'choosing');
+    assert.ok(Math.abs(f.stickyNote.position.z - .395) < .0001);
+  } finally { f.cleanup(); }
+});
+
+test('all domain cases share the same full-size game-case shell', () => {
+  const f = setup();
+  try {
+    const cases = f.scene.getObjectByName('ACM domain disc library').children.filter(node => node.name.endsWith('disc case'));
+    assert.equal(cases.length, 5);
+    for (const box of cases) {
+      const size = new THREE.Box3().setFromObject(box).getSize(new THREE.Vector3());
+      assert.ok(Math.abs(size.x - GAME_CASE.width) < .003);
+      assert.ok(Math.abs(size.y - GAME_CASE.height) < 1e-8);
+      assert.ok(Math.abs(size.z - GAME_CASE.depth) < .001);
+    }
+  } finally { f.cleanup(); }
+});
 
 test('shelf clicks are gated on the device, expose five native buttons, and ignore re-entry', () => {
   const f = setup();
@@ -86,7 +117,7 @@ test('reduced motion settles every case before the portrait camera focuses the T
     assert.equal(f.state().phase, 'booting'); assert.equal(f.library.zoom, 1);
     for (const object of f.scene.getObjectByName('ACM domain disc library').children) {
       if (!object.name.endsWith('disc case')) continue;
-      assert.equal(object.position.y, 1.6525); assert.ok(Math.abs(object.position.z - .13) < 1e-10);
+      assert.equal(object.position.y, CASE_CENTER_Y); assert.ok(Math.abs(object.position.z - .13) < 1e-10);
     }
     assert.equal(f.scene.getObjectByName('Removable domain disc').visible, false);
     f.advance(2, true); assert.equal(f.state().phase, 'active');

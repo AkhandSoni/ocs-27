@@ -1,3 +1,4 @@
+import { GAME_CASE, CASE_CENTER_Y } from "../src/lib/game-case.ts";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
@@ -20,7 +21,7 @@ test('all five cases remain visible and separated in wide and portrait viewports
       model.updateMatrixWorld();
       const center = model.position.clone().project(camera);
       centers.push(center);
-      for (const x of [-.17, .17]) for (const y of [-.2025, .2025]) for (const z of [-.033, .033]) {
+      for (const x of [-GAME_CASE.width / 2, GAME_CASE.width / 2]) for (const y of [-GAME_CASE.height / 2, GAME_CASE.height / 2]) for (const z of [-.033, .033]) {
         const projected = new THREE.Vector3(x, y, z).applyMatrix4(model.matrixWorld).project(camera);
         assert.ok(Math.abs(projected.x) < .94 && Math.abs(projected.y) < .94, `${width}x${height}: case ${i} stays in the view`);
       }
@@ -54,7 +55,7 @@ test('restored cases exactly replace their shelf instances, without duplicate ca
     const layout = makeCaseLayout(8, 16 / 9, 38);
     motion.update(1, sampleLoad(3), i, layout);
     motion.update(0, sampleLoad(0), null, layout);
-    assert.ok(model.position.distanceTo(new THREE.Vector3(-.95 + DOMAIN_SHELF_INDICES[i] * .074, 1.6525, .13)) < 1e-10);
+    assert.ok(model.position.distanceTo(new THREE.Vector3(-.95 + DOMAIN_SHELF_INDICES[i] * .074, CASE_CENTER_Y, .13)) < 1e-10);
     assert.ok(model.quaternion.angleTo(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0))) < 1e-7);
     assert.equal(model.scale.x, 1, 'the physical cases never inflate');
   });

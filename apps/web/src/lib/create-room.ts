@@ -171,7 +171,7 @@ export async function createRoom(
   const library = createDomainLibrary(scene, camera, container, state => {
     pickup?.setEnabled(state.phase === "idle");
     callbacks.onDomainState(state);
-  });
+  }, room.stickyNote);
 
   async function addModel(path: string, height: number, position: THREE.Vector3, rotation: THREE.Euler) {
     try {
