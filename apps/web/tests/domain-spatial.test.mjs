@@ -5,30 +5,34 @@ import * as THREE from 'three';
 import { makeCaseLayout, CaseMotion, DiscMotion, DISC_RADIUS, roomCameraZ, tvCameraZ } from '../src/lib/domain-spatial.ts';
 import { DOMAINS, DOMAIN_SHELF_INDICES, CUES, sampleLoad } from '../src/lib/domain-sequence.ts';
 
-test('all five cases remain visible and separated in wide and portrait viewports', () => {
+test('cases form a close overlapping fan with Tech foremost on the left', () => {
   for (const [width, height] of [[1440, 900], [843, 524], [390, 844], [768, 1024]]) {
-    const aspect = width / height;
-    const fov = width < 680 ? 48 : 38;
+    const aspect = width / height, fov = width < 680 ? 48 : 38;
     const camera = new THREE.PerspectiveCamera(fov, aspect, .1, 80);
     camera.position.set(0, 3.66, roomCameraZ(aspect, fov, true));
     camera.lookAt(0, 3.65, -.3); camera.updateMatrixWorld();
     const layout = makeCaseLayout(camera.position.z, aspect, fov);
-    const centers = [];
+    assert.equal(layout.order[0], 0);
+    const rectangles = [];
     for (let i = 0; i < DOMAINS.length; i++) {
-      const model = new THREE.Group();
-      const motion = new CaseMotion(model, i);
-      motion.update(1, sampleLoad(0), null, layout);
-      model.updateMatrixWorld();
-      const center = model.position.clone().project(camera);
-      centers.push(center);
+      const model = new THREE.Group(); new CaseMotion(model, i).update(1, sampleLoad(0), null, layout); model.updateMatrixWorld();
+      const corners = [];
       for (const x of [-GAME_CASE.width / 2, GAME_CASE.width / 2]) for (const y of [-GAME_CASE.height / 2, GAME_CASE.height / 2]) for (const z of [-.033, .033]) {
-        const projected = new THREE.Vector3(x, y, z).applyMatrix4(model.matrixWorld).project(camera);
-        assert.ok(Math.abs(projected.x) < .94 && Math.abs(projected.y) < .94, `${width}x${height}: case ${i} stays in the view`);
+        const p = new THREE.Vector3(x, y, z).applyMatrix4(model.matrixWorld).project(camera);
+        assert.ok(Math.abs(p.x) < .94 && Math.abs(p.y) < .94, `${width}x${height}: case ${i} remains visible`);
+        corners.push(p);
+      }
+      rectangles.push({left:Math.min(...corners.map(p=>p.x)),right:Math.max(...corners.map(p=>p.x)),height:Math.max(...corners.map(p=>p.y))-Math.min(...corners.map(p=>p.y))});
+      if (i) {
+        assert.ok(layout.positions[i].x > layout.positions[i-1].x, 'fan extends behind Tech toward the right');
+        assert.ok(layout.positions[i].z < layout.positions[i-1].z, 'Tech is closest, each following case is behind it');
+        assert.ok(rectangles[i].left < rectangles[i-1].right, 'neighbouring cases overlap like cards');
       }
     }
-    for (let i = 0; i < centers.length; i++) for (let j = i + 1; j < centers.length; j++) {
-      assert.ok(centers[i].distanceTo(centers[j]) > .12, 'cases have separate click targets');
-    }
+    assert.ok(rectangles[0].height > (aspect < .85 ? .40 : .85), 'front cover fills a substantial part of the view');
+    const reordered = makeCaseLayout(camera.position.z, aspect, fov, 4);
+    assert.equal(reordered.order[0], 4);
+    assert.ok(reordered.positions.every((p,i)=>i===4 || p.z < reordered.positions[4].z), 'chosen Management cover becomes the front case');
   }
 });
 

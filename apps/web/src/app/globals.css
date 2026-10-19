@@ -7,9 +7,11 @@
 .domain-shelf-target .domain-shelf-caption{position:absolute;left:44%;top:-8px;transform:translate(-50%,4px);white-space:nowrap;padding:7px 13px;border:1px solid #e0d4a438;border-radius:5px;background:#141511ed;color:#f2e7c5;font-size:12px;letter-spacing:.04em;opacity:0;visibility:hidden;pointer-events:none;box-shadow:0 5px 18px #0003;transition:opacity .18s,transform .18s,visibility .18s}
 .domain-shelf-target:hover .domain-shelf-caption,.domain-shelf-target:focus-visible .domain-shelf-caption{opacity:1;visibility:visible;transform:translate(-50%,-5px)}
 .domain-shelf-target:focus-visible{outline:1px solid #e4d6a2;outline-offset:4px;background:#e4d6a207}
-.domain-case-target>span{position:absolute;top:calc(100% + 12px);left:50%;width:max-content;max-width:125px;transform:translateX(-50%);padding:5px 8px;color:#e9eef6;font-size:12px;line-height:1.35;font-weight:500;text-align:center;text-shadow:0 2px 5px #000;background:#07101bce;border-bottom:1px solid transparent;border-radius:3px;transition:color .2s,border-color .2s}
-.domain-case-target:hover>span,.domain-case-target:focus-visible>span{color:var(--case-accent);border-bottom-color:var(--case-accent)}
-.domain-case-target:focus-visible{outline:1px solid var(--case-accent);outline-offset:7px}
+.domain-case-target>span{display:none}
+.domain-case-target:focus-visible{outline:none!important;background:#e9f4ff18!important;box-shadow:inset 0 0 0 2px #e4f1ffa6}
+.domain-interactions .domain-insert-action{z-index:2000;transform:translateX(-50%);width:max-content;max-width:90vw;height:40px;padding:0 19px;border:1px solid #d9e4f84a;border-radius:24px;background:#101926ed;color:#f4f6fa;font-size:13px;letter-spacing:.015em;box-shadow:0 5px 24px #0005;backdrop-filter:blur(12px);white-space:nowrap;transition:background .18s,opacity .18s}
+.domain-interactions .domain-insert-action:hover:not(:disabled){background:#243149;border-color:#eef5ffb3}
+.domain-interactions .domain-insert-action:disabled{opacity:.5}
 .domain-transport{position:absolute;inset:0;z-index:5;pointer-events:none}
 .domain-transport>button{position:absolute;top:max(18px,env(safe-area-inset-top));right:max(20px,env(safe-area-inset-right));display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid #d7e1ec35;border-radius:6px;background:#0c111be8;box-shadow:0 3px 15px #0002;color:#e0e6ee;font-size:12px;pointer-events:auto;touch-action:manipulation}
 .domain-transport>button:hover:not(:disabled){border-color:#e1ebfc88;background:#161f2bef}.domain-transport>button:disabled{opacity:.65;cursor:default}.domain-transport kbd{font:inherit;font-size:9px;opacity:.5;padding-left:8px;border-left:1px solid #ffffff20}

@@ -16,20 +16,24 @@ export function tvCameraZ(aspect: number, fov: number) {
   return Math.max(5.84 / (2 * tangent * aspect * .94), 3.38 / (2 * tangent * .84)) - .35;
 }
 
-export function makeCaseLayout(roomZ: number, aspect: number, fov: number) {
+export function makeCaseLayout(roomZ: number, aspect: number, fov: number, frontIndex = 0) {
   const narrow = aspect < .85;
   const tangent = Math.tan(THREE.MathUtils.degToRad(fov / 2));
-  const distance = Math.max(3.5, (narrow ? 1.95 : 3.25) / (2 * tangent * aspect * .82));
-  const centerY = 3.65 - distance * tangent * (narrow ? .24 : .48);
+  const distance = Math.max(1.35, (narrow ? .84 : 1.14) / (2 * tangent * aspect * .9), .92 / (2 * tangent * .9));
+  const centerY = 3.65 - distance * tangent * .10;
+  const order = [frontIndex, ...DOMAINS.map((_, i) => i).filter(i => i !== frontIndex)];
+  const ranks = DOMAINS.map((_, i) => order.indexOf(i));
   const positions = DOMAINS.map((_, i) => {
-    const column = narrow ? (i < 3 ? i - 1 : i - 3.5) : i - 2;
-    return new THREE.Vector3(column * .62, centerY + (narrow ? (i < 3 ? .35 : -.35) : 0), roomZ - distance - Math.abs(column) * .05);
+    const rank = ranks[i];
+    const angle = (2 - rank) * (narrow ? .11 : .16);
+    const step = narrow ? .035 : .065;
+    return new THREE.Vector3((rank - 2) * step - Math.sin(angle) * .25, centerY + Math.cos(angle) * .25 - .25 + rank * .008, roomZ - distance - rank * .10);
   });
-  const rotations = DOMAINS.map((_, i) => new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -.48 + (i - 2) * .045, 0)));
+  const rotations = DOMAINS.map((_, i) => new THREE.Quaternion().setFromEuler(new THREE.Euler(-.045, -.10, (2 - ranks[i]) * (narrow ? .11 : .16))));
   return {
-    positions, rotations,
-    focusPosition: new THREE.Vector3(-.12, 3.65 - distance * tangent * .13, roomZ - distance - .30),
-    focusRotation: new THREE.Quaternion().setFromEuler(new THREE.Euler(.05, -.18, -.025)),
+    positions, rotations, order, frontIndex, distance,
+    focusPosition: new THREE.Vector3(-.06, centerY + .025, roomZ - distance - .12),
+    focusRotation: new THREE.Quaternion().setFromEuler(new THREE.Euler(.025, -.10, -.025)),
   };
 }
 

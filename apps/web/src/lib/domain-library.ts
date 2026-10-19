@@ -79,6 +79,12 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
   let available = false;
   let previous: DomainState = sequence.state;
   let layout = makeCaseLayout(8, 16 / 9, 38);
+  let targetLayout = layout;
+  let fromPositions = layout.positions.map(position => position.clone());
+  let fromRotations = layout.rotations.map(rotation => rotation.clone());
+  let previewIndex = 0;
+  let fanProgress = 1;
+  let lastView = { z: 8, aspect: 16 / 9, fov: 38 };
   let layoutKey = "";
   let pose = sampleLoad(0);
 
@@ -100,20 +106,43 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     const button = document.createElement("button");
     button.type = "button";
     button.className = "domain-case-target";
-    button.setAttribute("aria-label", `Insert ${domain.name} disc`);
+    button.setAttribute("aria-label", `Select ${domain.name} case`);
+    button.setAttribute("aria-pressed", String(i === previewIndex));
     button.style.setProperty("--case-accent", domain.color);
     button.hidden = true;
     const caption = document.createElement("span");
     caption.textContent = domain.name;
     button.appendChild(caption);
-    button.onclick = () => { if (sequence.select(i)) publish(); };
+    button.onclick = () => preview(i);
     button.onkeydown = event => {
       const next = event.key === "ArrowRight" ? (i + 1) % buttons.length : event.key === "ArrowLeft" ? (i + buttons.length - 1) % buttons.length : event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : -1;
-      if (next >= 0) { event.preventDefault(); buttons[next].focus({ preventScroll: true }); }
+      if (next >= 0) { event.preventDefault(); preview(next); buttons[next].focus({ preventScroll: true }); }
     };
     overlay.appendChild(button);
     return button;
   });
+  const insert = document.createElement("button");
+  insert.type = "button";
+  insert.className = "domain-insert-action";
+  insert.hidden = true;
+  insert.textContent = `Insert ${DOMAINS[0].name} disc`;
+  insert.onclick = () => {
+    if (fanProgress < 1) return;
+    if (sequence.select(previewIndex)) publish();
+  };
+  overlay.appendChild(insert);
+  function preview(index: number) {
+    if (sequence.state.phase !== "choosing" || index === previewIndex) return;
+    fromPositions = layout.positions.map(position => position.clone());
+    fromRotations = layout.rotations.map(rotation => rotation.clone());
+    previewIndex = index;
+    targetLayout = makeCaseLayout(lastView.z, lastView.aspect, lastView.fov, previewIndex);
+    fanProgress = 0;
+    buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === previewIndex)));
+    insert.textContent = `Insert ${DOMAINS[previewIndex].name} disc`;
+    insert.disabled = true;
+    container.dataset.domainPreview = DOMAINS[previewIndex].id;
+  }
   container.appendChild(overlay);
   shelf.onclick = () => { if (available && sequence.open()) publish(); };
   let hovered = false, focused = false;
@@ -140,6 +169,13 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     shelf.hidden = next.phase !== "idle";
     shelf.setAttribute("aria-expanded", String(next.phase !== "idle"));
     buttons.forEach(button => { button.hidden = next.phase !== "choosing"; });
+    insert.hidden = next.phase !== "choosing";
+    if (next.phase === "idle") {
+      previewIndex = 0; fanProgress = 1; layoutKey = "";
+      buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
+      insert.textContent = `Insert ${DOMAINS[0].name} disc`;
+      delete container.dataset.domainPreview;
+    } else if (next.phase === "choosing") container.dataset.domainPreview = DOMAINS[previewIndex].id;
     container.dataset.domainPhase = next.phase;
     onState(next);
   }
@@ -149,7 +185,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
   const caseBox = new THREE.Box3(new THREE.Vector3(-GAME_CASE.width / 2 - .005, -GAME_CASE.height / 2 - .005, -.036), new THREE.Vector3(GAME_CASE.width / 2 + .005, GAME_CASE.height / 2 + .005, .036));
   const shelfBox = new THREE.Box3(new THREE.Vector3(...COLLECTION_BOUNDS.min), new THREE.Vector3(...COLLECTION_BOUNDS.max));
   const identity = new THREE.Matrix4();
-  function project(button: HTMLButtonElement, box: THREE.Box3, matrix: THREE.Matrix4, width: number, height: number) {
+  function project(button: HTMLButtonElement, box: THREE.Box3, matrix: THREE.Matrix4, width: number, height: number, clip = false) {
     let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
     for (let i = 0; i < 8; i++) {
       point.set(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(matrix).project(camera);
@@ -158,9 +194,21 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     }
     // A minimum touch target preserves access to the thin shelf at small sizes.
     const w = Math.max(32, right - left), h = Math.max(32, bottom - top);
-    button.style.transform = `translate3d(${(left + right - w) / 2}px,${(top + bottom - h) / 2}px,0)`;
+    const x = (left + right - w) / 2, y = (top + bottom - h) / 2;
+    button.style.transform = `translate3d(${x}px,${y}px,0)`;
     button.style.width = `${w}px`;
     button.style.height = `${h}px`;
+    if (clip) {
+      // Clip the hit target to the projected cover. Rectangles would steal clicks
+      // from the exposed corners of overlapping cases behind the front one.
+      const polygon: string[] = [];
+      for (const [px, py] of [[box.min.x, box.max.y], [box.max.x, box.max.y], [box.max.x, box.min.y], [box.min.x, box.min.y]]) {
+        point.set(px, py, box.max.z).applyMatrix4(matrix).project(camera);
+        polygon.push(`${(((point.x + 1) * width / 2 - x) / w) * 100}% ${(((1 - point.y) * height / 2 - y) / h) * 100}%`);
+      }
+      button.style.clipPath = `polygon(${polygon.join(",")})`;
+    }
+    return { x: (left + right) / 2, bottom };
   }
 
   return {
@@ -169,7 +217,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     get accent() { return sequence.state.selected === null ? null : DOMAINS[sequence.state.selected!].color; },
     get bootProgress() { return pose.boot; },
     exit,
-    focusChoice() { buttons[0].focus({ preventScroll: true }); },
+    focusChoice() { buttons[previewIndex].focus({ preventScroll: true }); },
     focusShelf() { shelf.focus({ preventScroll: true }); },
     setDevice(device: THREE.Object3D) {
       drive = makeDrive(device);
@@ -180,6 +228,8 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     setUnavailable() { shelf.setAttribute("aria-label", "Domain disc drive unavailable — reload to retry"); },
     advance(delta: number, reduced: boolean) {
       sequence.update(delta, { reduced });
+      if (Number.isFinite(delta) && delta >= 0) fanProgress = reduced ? 1 : Math.min(1, fanProgress + Math.min(delta, .05) / .52);
+      insert.disabled = fanProgress < 1;
       if (stickyNote && noteRest && noteRotation) {
         const lift = sequence.state.phase === "idle" && (hovered || focused) ? 1 : 0;
         const ease = reduced ? 1 : 1 - Math.exp(-delta * 12);
@@ -199,7 +249,16 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     draw(width: number, height: number, roomZ: number) {
       if (disposed) return;
       const nextKey = `${width}:${height}:${roomZ}`;
-      if (layoutKey !== nextKey) { layout = makeCaseLayout(roomZ, width / height, camera.fov); layoutKey = nextKey; }
+      lastView = { z: roomZ, aspect: width / height, fov: camera.fov };
+      if (layoutKey !== nextKey) {
+        layout = makeCaseLayout(roomZ, width / height, camera.fov, previewIndex);
+        targetLayout = layout; fanProgress = 1; layoutKey = nextKey;
+      } else if (layout !== targetLayout) {
+        const t = fanProgress * fanProgress * (3 - 2 * fanProgress);
+        layout.positions.forEach((position, i) => position.lerpVectors(fromPositions[i], targetLayout.positions[i], t));
+        layout.rotations.forEach((rotation, i) => rotation.slerpQuaternions(fromRotations[i], targetLayout.rotations[i], t));
+        if (fanProgress === 1) layout = targetLayout;
+      }
       const selected = sequence.state.selected;
       cases.forEach((item, index) => {
         item.motion.update(sequence.presentation, pose, selected, layout);
@@ -214,7 +273,16 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
         else disc.visible = false;
       }
       if (!shelf.hidden) project(shelf, shelfBox, identity, width, height);
-      if (sequence.state.phase === "choosing") buttons.forEach((button, i) => project(button, caseBox, cases[i].root.matrixWorld, width, height));
+      if (sequence.state.phase === "choosing") {
+        buttons.forEach((button, i) => {
+          project(button, caseBox, cases[i].root.matrixWorld, width, height, true);
+          point.copy(cases[i].root.position).applyMatrix4(camera.matrixWorldInverse);
+          button.style.zIndex = String(1000 + Math.round(point.z * 100));
+        });
+        const front = project(buttons[previewIndex], caseBox, cases[previewIndex].root.matrixWorld, width, height, true);
+        insert.style.left = `${front.x}px`;
+        insert.style.top = `${Math.min(height - 52, front.bottom + 14)}px`;
+      }
     },
     dispose() {
       disposed = true;
@@ -223,6 +291,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
       document.removeEventListener("keydown", onKey, true);
       shelf.removeEventListener("pointerenter", enterShelf);
       shelf.removeEventListener("pointerleave", leaveShelf);
+      delete container.dataset.domainPreview;
       overlay.remove();
       // Meshes and textures are owned and disposed by the room scene.
     },

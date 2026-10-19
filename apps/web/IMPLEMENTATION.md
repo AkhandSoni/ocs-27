@@ -18,6 +18,9 @@ A first signed-out visit runs a 17.4-second code-rendered startup after the room
 | `src/lib/game-case.ts` | Shared physical dimensions and plastic finish for games and domain cases |
 | `src/lib/game-collection.ts` | Instanced printed game spines, stacks, real cover artwork, curled sticky note |
 | `src/lib/game-catalog.ts` | Sixteen real games shared by the TV library and physical collection |
+| `src/lib/domain-library.ts` | Hinged cases, projected polygon hit targets, front-case selection, disc drive |
+| `src/lib/domain-spatial.ts` | Camera-relative overlapping fan and interpolated case/disc poses |
+| `src/lib/domain-sequence.ts` | Reversible presentation, insertion, startup, and return playheads |
 | `src/lib/room-objects.ts` | Procedural room, walnut furniture, plants, lights, photographic gallery |
 | `src/lib/auth.ts` | SQLite users/sessions, validation, password hashing, origin and cookie handling |
 | `src/app/api/auth/*/route.ts` | Local account HTTP endpoints |
@@ -40,6 +43,8 @@ These are local console accounts. There is no Sony/PlayStation Network authentic
 Names are 2–24 characters, email addresses are normalized, passwords are 8–128 characters at registration, and avatars are `astro`, `horizon`, `cosmic`, `sunset`, `forest`, or `violet`. Mutation requests must have a matching Origin. JSON request bodies are limited to 4 KiB. Error responses use `{ error, code }` and all auth responses disable caching.
 
 ## Graphics and media
+
+Opening Domains presents a close, overlapping fan with Tech foremost on the left. Selecting another case interpolates the fan to place that case at the front over 0.52 seconds, without starting insertion. Projected cover polygons and camera-depth stacking keep exposed rear edges clickable. The separate Insert action starts the existing loading sequence. All cases retain their shared physical dimensions; responsive framing changes distance rather than scale. Keyboard arrows select cases, and reduced motion skips spatial transitions.
 
 WebGPURenderer selects WebGPU or falls back to WebGL 2. `?renderer=webgl` forces the fallback; inspect `.room-stage[data-renderer]` to identify the active backend. The default camera stays focused on the TV and adapts to viewport aspect ratio. The HTML interface is a CSS3DObject using that same camera, so its controls remain native DOM controls.
 
