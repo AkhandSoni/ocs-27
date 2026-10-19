@@ -90,6 +90,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
   let lastView = { z: 8, aspect: 16 / 9, fov: 38 };
   let layoutKey = "";
   let pose = sampleLoad(0);
+  let shelveOthers = 0;
 
   const overlay = document.createElement("div");
   overlay.className = "domain-interactions";
@@ -151,7 +152,13 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
   shelf.addEventListener("pointerleave", leaveShelf);
   shelf.onfocus = () => { focused = true; };
   shelf.onblur = () => { focused = false; };
-  const exit = () => { if (sequence.exit()) publish(); };
+  const exit = () => {
+    if (!sequence.exit()) return;
+    // Ejection reverses the selected case and disc, not the whole fan.
+    // Early cancellation smoothly finishes shelving any other moving cases.
+    shelveOthers = pose.focus;
+    publish();
+  };
   const onKey = (event: KeyboardEvent) => {
     if (event.key === "Escape" && sequence.state.phase !== "idle") {
       event.preventDefault(); event.stopImmediatePropagation(); exit();
@@ -167,6 +174,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     shelf.setAttribute("aria-expanded", String(next.phase !== "idle"));
     buttons.forEach(button => { button.hidden = next.phase !== "choosing"; });
     if (next.phase === "idle") {
+      shelveOthers = 0;
       previewIndex = 0; fanProgress = 1; layoutKey = "";
       buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === 0)));
       delete container.dataset.domainPreview;
@@ -223,6 +231,9 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
     setUnavailable() { shelf.setAttribute("aria-label", "Domain disc drive unavailable — reload to retry"); },
     advance(delta: number, reduced: boolean) {
       sequence.update(delta, { reduced });
+      if (sequence.state.phase === "returning" && sequence.state.selected !== null && Number.isFinite(delta) && delta >= 0) {
+        shelveOthers = reduced ? 1 : Math.min(1, shelveOthers + Math.min(delta, .05) / .45);
+      }
       if (Number.isFinite(delta) && delta >= 0) fanProgress = reduced ? 1 : Math.min(1, fanProgress + Math.min(delta, .05) / .52);
       if (stickyNote && noteRest && noteRotation) {
         const lift = sequence.state.phase === "idle" && (hovered || focused) ? 1 : 0;
@@ -260,7 +271,7 @@ export function createDomainLibrary(scene: THREE.Scene, camera: THREE.Perspectiv
         printedDisc.material.needsUpdate = true;
       }
       cases.forEach((item, index) => {
-        item.motion.update(sequence.presentation, pose, selected, layout);
+        item.motion.update(sequence.presentation, pose, selected, layout, shelveOthers);
         item.hinge.rotation.y = selected === index ? -pose.lid * 2.4 : 0;
         item.root.updateWorldMatrix(true, true);
       });

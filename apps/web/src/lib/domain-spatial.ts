@@ -47,7 +47,7 @@ export class CaseMotion {
     this.index = index;
     this.restPosition = new THREE.Vector3(-.95 + DOMAIN_SHELF_INDICES[index] * .074, CASE_CENTER_Y, GAME_CASE.centerZ);
   }
-  update(presentation: number, pose: LoadPose, selected: number | null, layout: CaseLayout) {
+  update(presentation: number, pose: LoadPose, selected: number | null, layout: CaseLayout, shelveOthers = 0) {
     // Pull straight out of the tightly packed shelf before turning the case.
     const stagger = this.index * .035;
     const t = Math.max(0, Math.min(1, (presentation - stagger) / (1 - stagger)));
@@ -64,8 +64,9 @@ export class CaseMotion {
       this.model.position.lerp(this.restPosition, pose.caseReturn);
       this.model.quaternion.slerp(this.restRotation, pose.caseReturn);
     } else if (selected !== null) {
-      this.model.position.lerp(this.restPosition, pose.focus);
-      this.model.quaternion.slerp(this.restRotation, pose.focus);
+      const shelf = Math.max(pose.focus, shelveOthers);
+      this.model.position.lerp(this.restPosition, shelf);
+      this.model.quaternion.slerp(this.restRotation, shelf);
     }
   }
 }

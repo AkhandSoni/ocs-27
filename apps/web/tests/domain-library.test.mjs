@@ -116,6 +116,30 @@ test('dispose removes interaction elements and its document keyboard handler', (
   } finally { f.cleanup(); }
 });
 
+test('ejecting a loaded disc brings forward only its matching case', () => {
+  for (const selected of [0, 1, 2, 3, 4]) {
+    const f = setup();
+    try {
+      f.library.setDevice(f.device); f.shelf.click(); f.advance(2); f.choose(selected); f.advance(CUES.end + 1);
+      const cases = f.scene.getObjectByName('ACM domain disc library').children.filter(node => node.name.endsWith('disc case'));
+      const rest = cases.map(node => ({ position: node.position.clone(), rotation: node.quaternion.clone() }));
+      let matchingCaseCameForward = false;
+      f.library.exit();
+      for (let t = 0; t < 16; t += 1 / 120) {
+        f.library.advance(1 / 120, false); f.library.draw(1440, 900, 8.3);
+        cases.forEach((node, i) => {
+          if (i === selected) { if (node.position.z > 1) matchingCaseCameForward = true; return; }
+          assert.ok(node.position.distanceTo(rest[i].position) < 1e-9, `case ${i} must stay on the shelf while ejecting ${selected}`);
+          assert.ok(node.quaternion.angleTo(rest[i].rotation) < 1e-7);
+        });
+      }
+      assert.ok(matchingCaseCameForward);
+      assert.equal(f.state().phase, 'idle');
+      assert.ok(cases[selected].position.distanceTo(rest[selected].position) < 1e-9);
+    } finally { f.cleanup(); }
+  }
+});
+
 test('clicking a fanned case brings it forward without inserting its disc', () => {
   const f = setup();
   try {
