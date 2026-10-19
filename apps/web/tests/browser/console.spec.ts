@@ -85,6 +85,10 @@ test("short skippable startup opens an original guest console and five domains",
     .click({ force: true, timeout: 800 })
     .catch(() => {});
   await expect(page.locator(".startup-screen")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Who’s using this console?" }),
+  ).toBeVisible();
+  await page.waitForTimeout(700);
   await page.screenshot({ path: info.outputPath("login.png") });
   await page
     .getByRole("button", { name: "Continue as guest", exact: true })
@@ -172,6 +176,47 @@ test("physical console powers off to TV static and the complete controller works
   await page.getByRole("button", { name: "Power on" }).click();
   await continueStartup(page);
   await expect(page.locator("[data-console-home]")).toBeVisible();
+});
+
+test("every virtual controller button emits its assigned console action", async ({ page }) => {
+  await enter(page);
+  await page.getByRole("button", { name: "Controller", exact: true }).click();
+  await page.evaluate(() => {
+    const actions: string[] = [];
+    window.addEventListener("ocs:controller-action", (event) => {
+      actions.push((event as CustomEvent<string>).detail);
+      event.stopImmediatePropagation();
+    }, true);
+    Object.assign(window, { __controllerActions: actions });
+  });
+  const mapped = [
+    ["L2 trigger · Previous", "left"], ["L1 · Previous", "left"],
+    ["R1 · Next", "right"], ["R2 trigger · Next", "right"],
+    ["D-pad up", "up"], ["D-pad left", "left"], ["D-pad right", "right"],
+    ["D-pad down", "down"], ["Create · Help", "help"],
+    ["Touchpad · Console home", "home"], ["Options · Control center", "system"],
+    ["Left stick click · Select", "confirm"], ["Right stick click · Select", "confirm"],
+    ["Left stick up", "up"], ["Left stick down", "down"],
+    ["Left stick left", "left"], ["Left stick right", "right"],
+    ["Right stick up", "up"], ["Right stick down", "down"],
+    ["Right stick left", "left"], ["Right stick right", "right"],
+    ["Square · Back", "back"], ["Triangle · Home", "home"],
+    ["Circle · Back", "back"], ["Cross · Select", "confirm"],
+  ] as const;
+  for (const [label] of mapped) {
+    const button = page.getByRole("button", { name: label, exact: true });
+    await button.hover();
+    await page.mouse.down();
+    await expect(button).toHaveAttribute("data-pressed", "true");
+    await expect(page.locator('.virtual-controller button[data-pressed="true"]')).toHaveCount(1);
+    await expect(page.locator('.physical-controller button[data-pressed="true"]')).toHaveCount(1);
+    await page.mouse.up();
+    await expect(page.locator('.virtual-controller button[data-pressed="true"]')).toHaveCount(0);
+    await expect(page.locator('.physical-controller button[data-pressed="true"]')).toHaveCount(0);
+  }
+  expect(await page.evaluate(() => (window as Window & { __controllerActions?: string[] }).__controllerActions)).toEqual(
+    mapped.map(([, action]) => action),
+  );
 });
 
 test("guest application persists, signs in at submission, and saves an honest local receipt", async ({

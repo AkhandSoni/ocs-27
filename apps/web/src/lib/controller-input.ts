@@ -31,9 +31,32 @@ export function controllerAction(action: ControllerAction) {
     new CustomEvent("ocs:controller-action", { detail: action }),
   );
 }
-export function controllerFeedback(action: ControllerAction, pressed: boolean) {
+const feedbackControl: Record<ControllerAction, string> = {
+  left: "left",
+  right: "right",
+  up: "up",
+  down: "down",
+  confirm: "cross",
+  back: "circle",
+  home: "touchpad",
+  help: "create",
+  system: "options",
+  controller: "controller",
+};
+export type ControllerFeedback = {
+  action: ControllerAction;
+  pressed: boolean;
+  control: string;
+};
+export function controllerFeedback(
+  action: ControllerAction,
+  pressed: boolean,
+  control = feedbackControl[action],
+) {
   window.dispatchEvent(
-    new CustomEvent("ocs:controller-feedback", { detail: { action, pressed } }),
+    new CustomEvent<ControllerFeedback>("ocs:controller-feedback", {
+      detail: { action, pressed, control },
+    }),
   );
 }
 export function isEditing(target: EventTarget | null) {

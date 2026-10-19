@@ -25,11 +25,11 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    #101923 4%,
-    #101923f7 30%,
-    #101923d9 44%,
-    #10192350 64%,
-    #10192300 81%
+    #0b1428 4%,
+    #0b1428f7 30%,
+    #0b1428d9 44%,
+    #0b142850 64%,
+    #0b142800 81%
   );
 }
 .console-home > .home-world {
@@ -46,7 +46,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #24353d;
+  background: #253957;
 }
 .game-cover > svg {
   width: 100%;
@@ -56,7 +56,7 @@
 .cover-shade {
   position: absolute;
   inset: 40% 0 0;
-  background: linear-gradient(0deg, #081018f5, transparent);
+  background: linear-gradient(0deg, #071020f5, transparent);
 }
 .cover-title {
   position: absolute;
@@ -80,7 +80,7 @@
 .cartridge-index {
   z-index: 2;
   padding: 2px 3px;
-  background: #0d1821b0;
+  background: #101d35b0;
   border-radius: 2px;
   color: #dce5eb;
 }
@@ -197,11 +197,11 @@
 .domain-world .world-legibility {
   background: linear-gradient(
     90deg,
-    #101923 8%,
-    #101923fa 34%,
-    #101923e8 52%,
-    #10192370 71%,
-    #10192320
+    #0b1428 8%,
+    #0b1428fa 34%,
+    #0b1428e8 52%,
+    #0b142870 71%,
+    #0b142820
   );
 }
 .domain-app > :not(.domain-world) {
@@ -255,7 +255,7 @@
     margin-left: -75%;
   }
   .world-legibility {
-    background: linear-gradient(0deg, #101923 10%, #101923d9 48%, #10192380);
+    background: linear-gradient(0deg, #0b1428 10%, #0b1428d9 48%, #0b142880);
   }
   .experience-tech .experience-title h1 {
     font-size: 64px;

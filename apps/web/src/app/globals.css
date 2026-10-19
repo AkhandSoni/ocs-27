@@ -341,12 +341,12 @@ a:focus-visible {
   right: 78px;
 }
 .pad-create {
-  left: 92px;
-  top: 43px;
+  left: 75px;
+  top: 55px;
 }
 .pad-options {
-  right: 92px;
-  top: 43px;
+  right: 75px;
+  top: 55px;
 }
 .pad-touchpad {
   width: 54px !important;
@@ -517,12 +517,12 @@ a:focus-visible {
   right: 78px;
 }
 .physical-create {
-  left: 92px;
-  top: 43px;
+  left: 75px;
+  top: 55px;
 }
 .physical-options {
-  right: 92px;
-  top: 43px;
+  right: 75px;
+  top: 55px;
 }
 .physical-touchpad {
   width: 54px !important;

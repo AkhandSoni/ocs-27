@@ -148,7 +148,11 @@ export default function ConsoleShell({
   useLayoutEffect(() => {
     function control(e: Event) {
       const action = (e as CustomEvent<ControllerAction>).detail;
-      if (boot || startup) return;
+      if (boot) return;
+      if (startup) {
+        childInput.current?.(action);
+        return;
+      }
       if (action === "help" || action === "system") {
         setPanel((current) =>
           current ? null : action === "help" ? "help" : "system",

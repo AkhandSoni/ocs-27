@@ -11,6 +11,7 @@ import {
   controllerAction,
   controllerFeedback,
   type ControllerAction,
+  type ControllerFeedback,
 } from "./controller-input";
 
 export type RoomController = {
@@ -139,20 +140,21 @@ export async function createRoom(
     button.className = `physical-${position}`;
     button.textContent = symbol;
     button.dataset.action = action;
+    button.dataset.control = position;
     button.setAttribute("aria-label", `Room controller ${label}`);
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.setPointerCapture(event.pointerId);
-      controllerFeedback(action, true);
+      controllerFeedback(action, true, position);
     });
     button.addEventListener("pointerup", () =>
-      controllerFeedback(action, false),
+      controllerFeedback(action, false, position),
     );
     button.addEventListener("pointercancel", () =>
-      controllerFeedback(action, false),
+      controllerFeedback(action, false, position),
     );
     button.addEventListener("lostpointercapture", () =>
-      controllerFeedback(action, false),
+      controllerFeedback(action, false, position),
     );
     button.addEventListener("click", () => controllerAction(action));
     controllerElement.appendChild(button);
@@ -162,13 +164,13 @@ export async function createRoom(
   controllerUI.scale.setScalar(0.004);
   cssScene.add(controllerUI);
   function onControllerFeedback(event: Event) {
-    const { action, pressed } = (
-      event as CustomEvent<{ action: ControllerAction; pressed: boolean }>
+    const { control, pressed } = (
+      event as CustomEvent<ControllerFeedback>
     ).detail;
     controllerElement
       .querySelectorAll<HTMLButtonElement>("button")
       .forEach((button) => {
-        if (button.dataset.action === action)
+        if (button.dataset.control === control)
           button.dataset.pressed = String(pressed);
       });
   }

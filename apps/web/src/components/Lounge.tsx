@@ -146,7 +146,7 @@ export default function Lounge() {
           )}
         </div>
       )}
-      {powered && !startupInProgress && <ControllerControls />}
+      {powered && <ControllerControls visible={!startupInProgress} />}
       {!flat && ready && (
         <button className="room-view-toggle" onClick={toggleRoom}>
           <Monitor size={15} />

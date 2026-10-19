@@ -5,12 +5,19 @@
   height: 720px;
   overflow: hidden;
   color: #edf1f4;
-  background: #111a22;
+  background: #080f20;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 400;
   outline: none;
   pointer-events: auto;
-  --selection: #72aef1;
+  --selection: #86b8f5;
+  --system-ink: #080f20;
+  --system-panel: #111d35;
+  --system-muted: #aab4c5;
+  --system-motion-fast: 180ms;
+  --system-motion: 250ms;
+  --system-motion-enter: 500ms;
+  --system-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
 }
 .ocs-console * {
   box-sizing: border-box;
@@ -179,10 +186,10 @@
   overflow: hidden;
   background: #202b35 !important;
   transition:
-    height 0.24s,
-    width 0.24s,
-    flex-basis 0.24s,
-    background 0.24s;
+    height var(--system-motion),
+    width var(--system-motion),
+    flex-basis var(--system-motion),
+    background var(--system-motion);
 }
 .cartridge > svg:not(.cartridge-check) {
   position: absolute;
@@ -1017,80 +1024,51 @@
   inset: 0;
   z-index: 31;
   display: grid;
-  place-items: center;
+  place-items: stretch;
   overflow-y: auto;
   padding: 28px;
-  background: #08111bea;
-  animation: console-fade 0.2s ease;
+  background: #080f20;
+  animation: console-fade var(--system-motion-fast) ease;
 }
-.startup-card {
-  width: min(480px, 100%);
-  padding: 36px 42px;
-  border: 1px solid #ffffff25;
-  background: #0d1721f7;
-  box-shadow: 0 24px 80px #0008;
-}
-.startup-card > .system-kicker {
-  margin: 0 0 26px;
-  font-size: 9px;
-  letter-spacing: 2px;
-}
-.startup-screen .auth-native > p {
-  margin: 0 0 22px;
-}
-.startup-screen .auth-native .console-field {
-  margin: 18px 0;
-}
-.startup-screen .auth-native .quiet-button {
-  margin-top: 18px;
-}
-.startup-guest-button {
-  width: 100%;
-  min-height: 44px;
-  margin-top: 14px;
-  border: 1px solid #ffffff2c;
-  color: #d4dce1;
-  font-size: 13px;
-}
-.startup-guest-button:hover,
-.startup-guest-button:focus-visible {
-  background: #ffffff0b;
-  color: white;
-}
-.startup-player {
-  text-align: center;
-}
-.startup-player-icon {
-  display: grid;
-  width: 54px;
-  height: 54px;
-  margin: 6px auto 18px;
-  place-items: center;
-  border: 1px solid #ffffff30;
-  border-radius: 50%;
-  color: #d6c18d;
-}
-.startup-player h1 {
-  margin: 0 0 12px;
-  font-size: 28px;
-  font-weight: 400;
-}
-.startup-player p,
-.startup-error {
-  color: #a3b3c2;
-  font-size: 13px;
-}
-.startup-player .launch-button {
-  margin: 22px auto 0;
-}
+.startup-time { position: absolute; top: 42px; right: 52px; color: #e8edf5; font-size: 21px; letter-spacing: -.4px; }
+.startup-players { position: absolute; inset: 0; animation: console-content-in 650ms ease both; }
+.startup-heading { position: absolute; top: 132px; left: 0; right: 0; text-align: center; }
+.startup-heading p { margin: 0 0 14px; color: #b9c7dc; font-size: 12px; letter-spacing: 2.4px; }
+.startup-heading h1 { margin: 0; font-size: 35px; font-weight: 300; letter-spacing: -.65px; }
+.startup-heading > span { display: block; margin-top: 17px; color: #c8d0dd; font-size: 17px; }
+.startup-profiles { position: absolute; top: 328px; left: 55px; right: 55px; display: flex; justify-content: center; align-items: flex-start; gap: 48px; }
+.startup-profile { width: 158px; flex: 0 0 158px; display: grid; justify-items: center; gap: 19px; padding: 8px 0 0; color: #d7dce5; font-size: 15px; transition: transform 220ms var(--system-ease), color 180ms ease; }
+.startup-profile:hover, .startup-profile:focus-visible { transform: translateY(-3px); color: #fff; }
+.ocs-console .startup-profile:focus-visible { outline: none; }
+.startup-avatar { position: relative; display: grid; width: 114px; height: 114px; place-items: center; border-radius: 50%; background: #315b91; box-shadow: inset 0 0 0 1px #ffffff35, 0 7px 25px #0004; color: #fff; font-size: 42px; transition: transform 250ms var(--system-ease), box-shadow 250ms ease; }
+.startup-avatar::after { position: absolute; content: ""; inset: -8px; border: 1px solid transparent; border-radius: inherit; transition: border-color 200ms ease, box-shadow 200ms ease; }
+.startup-profile:hover .startup-avatar, .startup-profile:focus-visible .startup-avatar { transform: scale(1.08); }
+.startup-profile:hover .startup-avatar::after, .startup-profile:focus-visible .startup-avatar::after { border-color: #e4eaf5; box-shadow: 0 0 0 3px #e4eaf512; }
+.startup-avatar-guest { background: #293950; }
+.startup-avatar-add { background: #252d3c; }
+.startup-avatar svg { width: 48px; height: 48px; stroke-width: 1.4; }
+.startup-guest-link { position: absolute; left: 50%; bottom: 111px; display: flex; align-items: center; gap: 10px; transform: translateX(-50%); padding: 11px 16px !important; color: #e3e8f0 !important; font-size: 14px; }
+.startup-guest-link:hover { background: #ffffff10 !important; }
+.startup-footer { position: absolute; left: 52px; right: 52px; bottom: 35px; display: flex; justify-content: space-between; align-items: center; color: #9ba8bc; font-size: 12px; letter-spacing: 1px; }
+.startup-footer .acm-brand { width: 118px; height: auto; opacity: .8; }
+.startup-auth-content { position: absolute; inset: 0; animation: console-content-in 450ms ease both; }
+.startup-back { position: absolute; top: 42px; left: 52px; display: flex; align-items: center; gap: 9px; color: #e0e5ed !important; font-size: 14px; }
+.startup-auth-brand { position: absolute; top: 38px; right: 52px; }
+.startup-auth-brand .acm-brand { width: 122px; height: auto; }
+.startup-auth-panel { position: absolute; top: 50%; left: 18%; width: min(470px, 64%); max-height: 82%; overflow-y: auto; transform: translateY(-50%); padding: 34px 42px; background: #101b31cc; }
+.startup-auth-panel .system-kicker { color: #9eb2cf; }
+.startup-auth-panel .auth-native > h2 { font-size: 32px; font-weight: 300; }
+.startup-auth-panel .auth-native > p { color: #bbc6d6; }
+.startup-auth-panel .startup-guest-button { margin-top: 12px; }
+.startup-error { position: absolute; left: 52px; bottom: 32px; margin: 0; color: #f2c6c2; font-size: 13px; }
 .startup-loading {
   position: absolute;
   inset: 0;
   z-index: 31;
   display: grid;
   place-items: center;
-  background: #08111bea;
-  color: #a3b3c2;
+  background: #080f20f5;
+  color: #aab4c5;
   font-size: 13px;
 }
 .system-panel {
@@ -1099,7 +1077,7 @@
   top: 0;
   bottom: 0;
   width: 490px;
-  background: #0d1721f5;
+  background: #101b31f5;
   box-shadow: -20px 0 80px #0005;
   border-left: 1px solid #ffffff15;
   padding: 45px 45px;
@@ -1249,64 +1227,40 @@
 .boot-screen {
   position: absolute;
   inset: 0;
-  background: #060b13;
+  background: #080a0e;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.boot-version {
-  position: absolute;
-  top: 48px;
-  left: 60px;
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: #6e8396;
-}
 .boot-emblem {
   text-align: center;
-  animation: boot-reveal 0.6s ease both;
+  animation: boot-reveal 17.4s ease-in-out both;
 }
 .boot-emblem > .acm-brand {
-  width: 300px;
+  width: 224px;
   height: auto;
   object-fit: contain;
+  animation: boot-logo 17.4s ease-in-out both;
 }
 .boot-emblem h1 {
-  font-size: 32px;
-  letter-spacing: 8px;
-  font-weight: 400;
-  margin: 14px 0;
-}
-.boot-emblem h1 > span {
-  color: #8099ac;
+  font-size: 18px;
+  letter-spacing: 5px;
   font-weight: 300;
-  margin-left: 12px;
+  margin: 26px 0 12px;
+  animation: boot-title 17.4s ease-in-out both;
 }
 .boot-emblem p {
-  font-size: 13px;
-  letter-spacing: 2px;
-  color: #8ca3b7;
-}
-.boot-progress {
-  position: absolute;
-  bottom: 90px;
-  width: 140px;
-  height: 1px;
-  background: #253544;
-}
-.boot-progress > span {
-  display: block;
-  height: 100%;
-  background: #d3e4ee;
-  transform-origin: left;
-  animation: boot-load 3.2s linear both;
+  font-size: 12px;
+  letter-spacing: 1.7px;
+  color: #9da4b1;
+  animation: boot-tagline 17.4s ease-in-out both;
 }
 .boot-screen > button {
   position: absolute;
   bottom: 45px;
   right: 60px;
   font-size: 11px;
-  color: #8197aa;
+  color: #aab1be;
 }
 .boot-screen kbd {
   border: 1px solid #60728566;
@@ -1355,23 +1309,22 @@
   }
 }
 @keyframes boot-reveal {
-  0% {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  25%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0%, 16% { opacity: 0; transform: translateY(6px); }
+  24%, 42% { opacity: 1; transform: translateY(0); }
+  48%, 64% { opacity: 0; transform: translateY(-2px); }
+  72%, 100% { opacity: 1; transform: translateY(0); }
 }
-@keyframes boot-load {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+@keyframes boot-logo {
+  0%, 17% { opacity: 0; transform: scale(.96); filter: blur(4px); }
+  24%, 42% { opacity: 1; transform: scale(1); filter: blur(0); }
+  48%, 63% { opacity: 0; transform: scale(1); filter: blur(0); }
+  69%, 100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes boot-title { 0%, 67% { opacity: 0; } 74%, 100% { opacity: 1; } }
+@keyframes boot-tagline { 0%, 76% { opacity: 0; } 83%, 100% { opacity: 1; } }
+@keyframes console-content-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .boot-emblem, .boot-emblem > .acm-brand, .boot-emblem h1, .boot-emblem p { animation-duration: 1ms !important; animation-delay: 0ms !important; }
 }
 @keyframes console-spin {
   to {
@@ -1379,6 +1332,23 @@
   }
 }
 @media (max-width: 680px) {
+  .startup-time { top: 22px; right: 22px; font-size: 16px; }
+  .startup-heading { top: 22%; padding: 0 18px; }
+  .startup-heading h1 { font-size: 26px; }
+  .startup-heading > span { font-size: 13px; }
+  .startup-profiles { top: 45%; left: 12px; right: 12px; gap: 5px; }
+  .startup-profile { width: 33.33%; flex-basis: 33.33%; gap: 13px; font-size: 12px; }
+  .startup-avatar { width: 76px; height: 76px; font-size: 30px; }
+  .startup-avatar svg { width: 34px; height: 34px; }
+  .startup-footer { left: 20px; right: 20px; bottom: 22px; font-size: 9px; }
+  .startup-footer .acm-brand { width: 92px; }
+  .startup-guest-link { bottom: 74px; font-size: 12px; }
+  .startup-auth-panel { left: 5%; width: 90%; max-height: 78%; padding: 24px; }
+  .startup-auth-panel .auth-native > h2 { font-size: 26px; }
+  .startup-back { top: 22px; left: 20px; font-size: 12px; }
+  .startup-auth-brand { top: 21px; right: 20px; }
+  .startup-auth-brand .acm-brand { width: 82px; }
+  .startup-error { left: 20px; right: 20px; bottom: 16px; font-size: 11px; }
   .ocs-console {
     width: 100%;
     height: 100svh;
@@ -1842,18 +1812,12 @@
   .system-panel p {
     font-size: 13px;
   }
-  .boot-version {
-    left: 28px;
-    top: 38px;
-    font-size: 7px;
-    letter-spacing: 2px;
-  }
   .boot-emblem > .acm-brand {
-    width: 75px;
-    height: 85px;
+    width: 180px;
+    height: auto;
   }
   .boot-emblem h1 {
-    font-size: 27px;
+    font-size: 17px;
   }
   .boot-emblem p {
     font-size: 10px;
@@ -1875,9 +1839,6 @@
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
-  }
-  .boot-progress > span {
-    transform: scaleX(1);
   }
 }
 
