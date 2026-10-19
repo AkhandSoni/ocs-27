@@ -11,7 +11,7 @@ pnpm install
 pnpm dev:web
 ```
 
-Open [localhost:3000](http://localhost:3000). For verification and production:
+Open [localhost:2027](http://localhost:2027). For verification and production:
 
 ```powershell
 pnpm typecheck
@@ -20,7 +20,7 @@ pnpm build:web
 pnpm start:web
 ```
 
-Development and production both use port 3000; run one server at a time.
+Development and production both use port 2027; run one server at a time.
 
 ## Use the console
 
@@ -34,7 +34,7 @@ Click the DualSense on the cabinet to pick it up. It lifts along a curved path i
 
 ## Rendering and assets
 
-Three.js uses WebGPU when available and falls back to WebGL 2. Open [the explicit WebGL fallback](http://localhost:3000/?renderer=webgl) to check it. The `.room-stage` element records the active backend in its `data-renderer` attribute and controller pose in `data-controller-state`. CSS3DRenderer aligns the interactive HTML TV interface with the same perspective camera as the 3D room. A depth-tested transparent TV aperture lets foreground geometry occlude that interface using the same GPU renderer.
+Three.js uses WebGPU when available and falls back to WebGL 2. Open [the explicit WebGL fallback](http://localhost:2027/?renderer=webgl) to check it. The `.room-stage` element records the active backend in its `data-renderer` attribute and controller pose in `data-controller-state`. CSS3DRenderer aligns the interactive HTML TV interface with the same perspective camera as the 3D room. A depth-tested transparent TV aperture lets foreground geometry occlude that interface using the same GPU renderer.
 
 Runtime models use `EXT_meshopt_compression` and are decoded with Meshopt WASM:
 

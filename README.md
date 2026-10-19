@@ -13,7 +13,7 @@ pnpm install
 pnpm dev:web
 ```
 
-Open [localhost:3000](http://localhost:3000).
+Open [localhost:2027](http://localhost:2027).
 
 ```powershell
 pnpm typecheck
