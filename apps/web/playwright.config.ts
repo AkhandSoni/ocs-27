@@ -27,7 +27,6 @@ export default defineConfig({
         (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined),
       args: [
         "--no-sandbox",
-        "--enable-unsafe-webgpu",
         "--enable-unsafe-swiftshader",
         "--use-angle=swiftshader",
       ],
